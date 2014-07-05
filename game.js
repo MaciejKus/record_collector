@@ -4,129 +4,232 @@ var DIR_UP = 2;
 var DIR_DOWN = 3;
 
 //where hero starts minus 16
-var hero_start_x=100;
-var hero_start_y = 110;
+var hero_start_x=200;
+var hero_start_y = 210;
 
 //how much sprite images are ofset
-var offy= 28;
-var offx = 16;
+var offy= 32;
+var offx = 32;
 
-//checks for collisions in terms of y and x for hero
-var girl_x_old= -1;
-var girl_y_old = -1;
-var map_x_old = -999;
-var map_y_old = -999;
+//used for checking for collisions in terms of y and x for hero
+var hero_x_old= -1;
+var hero_y_old = -1;
+var floor_x_old = -999;
+var floor_y_old = -999;
+
+var records = 0;
 
 
 enchant();
 window.onload = function() {
-	var game = new Core(320,320);
+	var game = new Core(640,640);
 	game.fps = 16;
-	game.preload('map0.png','chara0.png');
+	game.preload('background.png','spritesheet.png','chara1.png');
 	game.onload = function() {
-		//map stuff. variables layer1, layer2 and collision can be found in map.js
-		var map = new Map(16,16);
-		map.image = game.assets['map0.png'];
-		map.loadData(layer1,layer2);
-		map.collisionData = collision;
+		//floor stuff. variables layer1, layer2 and collision can be found in floor.js
+		var floor = new Map(32,32);
+		floor.image = game.assets['background.png'];
+		floor.loadData(layer1);
+		floor.collisionData = collision;
+	//	var buildings = new Map(32,32);
+	//	buildings.image = game.assets['background.png'];
+	//	buildings.loadData(layer2);
 		//hero stuff
-		var girl = new Sprite(32,32);
-		girl.image = game.assets['chara0.png'];
-		girl.x = hero_start_x-offx;
-		girl.y = hero_start_y - offy;
-		girl.frame = 7;
-		girl.toX = girl.x;
-		girl.toY = girl.y;
-		girl.dir = DIR_DOWN;
-		girl.anim = [
-			15,16,17,16, //left
-			24, 25, 26, 24, //right
-			33, 34, 35, 34, //up
-			6,7,8,7]; // down
+		var hero = new Sprite(64,64);
+		hero.image = game.assets['spritesheet.png'];
+		hero.x = hero_start_x-offx;
+		hero.y = hero_start_y - offy;
+		hero.frame = 11;
+		hero.toX = hero.x;
+		hero.toY = hero.y;
+		hero.dir = DIR_DOWN;
+		hero.anim = [
+			6,5,7,5, //left
+			9,8,10,8, //right
+			1,0,2,0, //up
+			3,11,4,11]; // down
+		//////npc////////j
+		var vil = new Sprite(64,64);
+		vil.image = game.assets['spritesheet.png'];
+		vil.frame = 3;
+		vil.hit = false; //used to make sure collision event only happens once per collision
+		//////npc2////////j
+		var vil2 = new Sprite(32,32);
+		vil2.image = game.assets['chara1.png'];
+		vil2.x = 250;	
+		vil2.y = 250;
+		// label for record number
+		var recordLabel = new Label("Records: " + records);
+		recordLabel.x = 10;
+		recordLabel.y = 10;
+		recordLabel.color = "black";
+		
+		//updates recods lablel
+		recordLabel.addEventListener(Event.ENTER_FRAME, function() {
+			this.text = "Records: " +records;
+		});
 
+		//compared x y of hero to x y of last mouse click, if difference is large enough, hero x y moves to mouse click.
+		hero.addEventListener(Event.ENTER_FRAME, function() {
+			//moves vil the same amount as floor got moved
+			//has to happen before floor values change or 
+			//have to change the vil to be drawn after the hero
+			vil.x = 140+floor.x; //140 and 110 in next line are where vil stands CHANGE OT NONE MAGIC NUM
+	                vil.y = 110+floor.y;
 
-		//compared x y of hero to x y of last mouse click, if difference is large enough, hero x y change twords mouse click.
-		girl.addEventListener(Event.ENTER_FRAME, function() {
-			if (girl.y > girl.toY) {
-				girl.dir = DIR_UP;
+			if (hero.y > hero.toY) {
+				hero.dir = DIR_UP;
 				//if mouse click and hero are close enough together, just move hero to where mouseclick happened:
-				if (Math.abs(girl.y-girl.toY) < 4) {
-					girl.y=girl.toY;
-				} else if (girl.y<game.width/3 && map.y<0 && (map.hitTest(girl.x + offx+Math.abs(map.x), girl.y+offy+Math.abs(map.y)) == 0)) {
-					map.y+=4;
-					girl.toY+=4;
+				if (Math.abs(hero.y-hero.toY) < 4) {
+					hero.y=hero.toY;
+				} else if (hero.y<game.width/3 && floor.y<0 && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+offy+Math.abs(floor.y)) == 0)) {
+					floor.y+=4;
+					hero.toY+=4;
 				} else {
 				//if mouse click location and hero location are not close to one another move hero by certain amount towards mouse click (on y axis):
-					girl.y -= 4;
-				//if there is a collision undo the move made above. basically the hero did not move in the y direction:
-				//the Math.abs(map.y) and Math.abs(map.x) parts account for map scrolling.
-				//it is abs because the map is technically moved in the negative direction, but we are looking
-				//at the hero's location, which means the hero has moved in the positive direction (relative to the map)
-					if (map.hitTest(girl.x + offx+Math.abs(map.x), girl.y+offy+Math.abs(map.y))) girl.y +=4;
+					hero.y -= 4; //CHANGE 4 INTO NON MAGIC NUMBER
+				//if there is a collision undo the move made above. 
+				//basically the hero did not move in the y direction:
+				//the Math.abs(floor.y) and Math.abs(floor.x) parts 
+				//account for floor scrolling.
+				//it is abs because the floor is technically moved in 
+				//the negative direction, but we are looking
+				//at the hero's location, which means the hero has 
+				//moved in the positive direction (relative to the floor)
+					if (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+offy+Math.abs(floor.y))) hero.y +=4;
 				}
 			}
-			else if (girl.y < girl.toY) {
-				girl.dir = DIR_DOWN;
-				if (Math.abs(girl.y-girl.toY) < 4) {
-					girl.y=girl.toY;
-				} else if (girl.y>game.height -(game.height/3) && map.height+map.y>game.height && (map.hitTest(girl.x + offx+Math.abs(map.x), girl.y+offy+Math.abs(map.y)) == 0)){
-				map.y -= 4;
-				girl.toY -=4;
+			else if (hero.y < hero.toY) {
+				hero.dir = DIR_DOWN;
+				if (Math.abs(hero.y-hero.toY) < 4) {
+					hero.y=hero.toY;
+				} else if (hero.y>game.height -(game.height/3) && floor.height+floor.y>game.height && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+(offy*2)+Math.abs(floor.y)) == 0)){
+				floor.y -= 4;
+				hero.toY -=4;
 				}
 				else {
-					girl.y +=4;
-					if (map.hitTest(girl.x + offx+Math.abs(map.x), girl.y+offy +Math.abs(map.y))) girl.y -=4;
+					hero.y +=4;
+					if (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+(offy*2) +Math.abs(floor.y))) hero.y -=4;
 				}
 			}
-			if (girl.x > girl.toX) {
-				girl.dir = DIR_LEFT;
-				if (Math.abs(girl.x - girl.toX) < 4) {
-					girl.x = girl.toX;
-				} else if (girl.x<(game.width/3) && map.x<0 && (map.hitTest(girl.x + offx+Math.abs(map.x), girl.y+offy+Math.abs(map.y)) == 0)) {
-					map.x+=4;
-					girl.toX +=4;
+			if (hero.x > hero.toX) {
+				hero.dir = DIR_LEFT;
+				if (Math.abs(hero.x - hero.toX) < 4) {
+					hero.x = hero.toX;
+				} else if (hero.x<(game.width/3) && floor.x<0 && (floor.hitTest(hero.x + (offx/2)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) == 0)) {
+					floor.x+=4;
+					hero.toX +=4;
 				} else {
-					girl.x -= 4;
-					if (map.hitTest(girl.x + offx +Math.abs(map.x), girl.y+offy+Math.abs(map.y))) girl.x +=4;}
+					hero.x -= 4;
+					if (floor.hitTest(hero.x + (offx/2) +Math.abs(floor.x), hero.y+(offy*2)+Math.abs(floor.y))) hero.x +=4;}
 				 }
-			else if (girl.x < girl.toX) {
-				girl.dir = DIR_RIGHT;
-					if (Math.abs(girl.x- girl.toX) < 4) {
-						girl.x = girl.toX;
-					//checks to see how far to the right of the window (game) the hero is and if there is any map left unseen to the right and that there are no collisions taking place:
-					} else if(girl.x>game.width-(game.width/3) && map.width+map.x>game.width && (map.hitTest(girl.x + offx+Math.abs(map.x), girl.y+offy+Math.abs(map.y)) == 0)) {
-						//scrolls the map
-						map.x -= 4;
-						girl.toX -=4;
+			else if (hero.x < hero.toX) {
+				hero.dir = DIR_RIGHT;
+					if (Math.abs(hero.x- hero.toX) < 4) {
+						hero.x = hero.toX;
+					//checks to see how far to the 
+					//right of the window (game) the hero is 
+					//and if there is any floor left unseen to 
+					//the right and that there are no collisions taking place:
+					} else if(hero.x>game.width-(game.width/3) && floor.width+floor.x>game.width && (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) == 0)) {
+						//scrolls the floor
+						floor.x -= 4;
+						hero.toX -=4;
 						} 
-					else {girl.x += 4;
-					if (map.hitTest(girl.x + offx+Math.abs(map.x), girl.y+offy+Math.abs(map.y))) girl.x -=4;
+					else {hero.x += 4;
+					if (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y))) hero.x -=4;
 				};
 			}
 
-		//stops animation of hero sprite if location of hero and x,y values of map havent changed since last frame:
-		if(girl.x==girl_x_old && girl_y_old== girl.y && map.x==map_x_old && map.y ==map_y_old) girl.age=1;
-		girl.frame = girl.anim[girl.dir*4+ (girl.age%4)];
-		//changes variables for next time around to see if the hero and map have moved or not:
-		girl_x_old = girl.x;
-		girl_y_old = girl.y;
-		map_x_old = map.x;
-		map_y_old = map.y;
+		//test for collisions between sprites and 
+		//runs appropriate function if collision occures:
+		//only runs if vil.hit is false, that is event only happens
+		//once per collision
+		if(hero.within(vil, 15) ) { //CHANGE MAGIC NUMBER 15
+			if (!vil.hit) { 
+				var addOne = function() {
+					records++;
+				}
+				game.pushScene(game.makeDialogueScene('test text','wwww','something', addOne)); //ADDS DIALGE BOX
+				vil.hit = true;
+			}
+			// CREATE VARIABLE COLISION = TRUE
+		} else {
+			vil.hit = false;
+		}
+
+		//stops animation of hero sprite if location of hero and x,y 
+		//values of floor havent changed since last frame (if floor hasnt moved):
+		if(hero.x==hero_x_old && hero_y_old== hero.y && floor.x==floor_x_old && floor.y ==floor_y_old) hero.age=1;
+		hero.frame = hero.anim[hero.dir*4+ (hero.age%4)];
+		//changes variables for next time around to see if the hero and floor have moved or not:
+		hero_x_old = hero.x;
+		hero_y_old = hero.y;
+		floor_x_old = floor.x;
+		floor_y_old = floor.y;
 		});
+
 
 
 		//listens for mouse click
 		game.rootScene.addEventListener(Event.TOUCH_START,function(e) {
-			girl.toX = e.x-offx ;
-			girl.toY = e.y-offy;
+			hero.toX = e.x-offx ;
+			hero.toY = e.y-offy;
 		});
-		
-		//draw stuff!
-		game.rootScene.addChild(map);
-		game.rootScene.addChild(girl);
 
-	};
+		//draw stuff!
+		game.rootScene.addChild(floor);
+		game.rootScene.addChild(vil);
+		game.rootScene.addChild(vil2);
+		game.rootScene.addChild(hero);
+//		game.rootScene.addChild(buildings);
+		game.rootScene.addChild(recordLabel);
+	}; //end rootScene
+
+	//dialogue box for when collision with sprit happens
+	//takes 3 dialogue lines plus what happens function 
+	game.makeDialogueScene = function (firstLine,secondLine,thirdLine,whatHappens) {
+		var scene = new Scene();
+		var bg = new Map(16,16);
+
+		var question = new Label(firstLine);
+		question.font = "16px monospace";
+		question.color = "rgb(255,255,255)";
+		question.backgroundColor = "rgba(0,0,0,0.8)";
+		//makes the question object be large enough to fill bottom of screen
+		//MAKE THESE NOT MAGIC NUMBERS
+		question.y = 200 ;
+		question.width = game.width;
+		question.height = game.height - 200;
+
+		var returnLabel = new Label(secondLine);
+		returnLabel.font = "16px monospace";
+		returnLabel.color="rgb(255,255,255)";
+		returnLabel.y = 216;
+		//if clicked on returnlable then goes back to root scene
+		returnLabel.addEventListener(Event.TOUCH_START, function(e) {
+			whatHappens();
+			game.popScene(game.makeDialogueScene());
+		});
+
+		var lastLabel = new Label("hhhhffffhhhhtttttjjjj333nnnssss111223thisistheend");//thirdLine);
+                lastLabel.font = "16px monospace";
+                lastLabel.color="rgb(255,255,255)";
+                lastLabel.y = 270;
+                //if clicked on returnlable then goes back to root scene
+                lastLabel.addEventListener(Event.TOUCH_START, function(e) {
+			game.popScene(game.makeDialogueScene());
+			game.pushScene(game.makeDialogueScene('x text','22 text','nothing', function() {records++;} ));
+		});
+
+
+		//draws scene stuff
+		scene.addChild(question);
+		scene.addChild(returnLabel);
+		scene.addChild(lastLabel);
+		return scene;
+	} //end of makeDialogueScene
+
 	game.start();
 };
-
 
