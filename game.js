@@ -20,7 +20,8 @@ var hero_y_old = -1;
 var floor_x_old = -999;
 var floor_y_old = -999;
 
-var records = 0, recordInc = 0, money = 0, moneyInc = 0,  npcArray = [];
+var records = 0, recordInc = 0, money = 0, moneyInc = 0;
+var recordLimit = 50; //recordLimit is the amount of storage space for records. 
 
 
 enchant();
@@ -53,16 +54,22 @@ window.onload = function() {
 			3,11,4,11]; // down
 		//////npc////////j
 		var mom = new Sprite(64,64);
-		mom.image = game.assets['spritesheet.png'];
+		var recStoreOwner = new Sprite(64,64);
+		var npcArray = [mom, recStoreOwner];
+		var npcCount = npcArray.length;
+		for (var i =0; i < npcCount; i++) {
+			npcArray[i].hit = false; //makes sure collision result only happens once per touch
+			npcArray[i].image = game.assets['spritesheet.png'];
+		}
+ 		
 		mom.frame = 3;
-		mom.hit = false; //used to make sure collision event only happens once per collision
 		mom.lineOne = "Hello dear.";
 		mom.lineTwo = 'Hi mom, can I have an allowance?';
 		mom.lineThree = 'Hi mom, can you buy me a record?';
 //************ figure out the dialoge chain.
 		mom.resultOne = function() { 
 			if (Math.random() < 0.9) {
-				moneyInc += .00001;
+				moneyInc += 0.00001;
 				mom.lineOne = "Honey, I hope you aren't spending all your money on those darn records";
 				mom.lineTwo = "Sure thing mom.";
 				mom.resultOne = nothing;
@@ -72,7 +79,7 @@ window.onload = function() {
 			}
 		};
 		mom.resultTwo = function() {
-			if (Math.random() <.4) {
+			if (Math.random() < 0.4) {
 				records++;
 				mom.lineThree = '';
 				mom.resultTwo = nothing;
@@ -80,9 +87,13 @@ window.onload = function() {
 			} else {
 				game.pushScene(game.makeDialogueScene("Sorry dear, I read records are detrimental to both the health and morals","That's only if you listen to them backwards","Inconceivable!!",nothing,nothing));
 			}
-		}
+		};
 				
-		npcArray.push(mom);
+		recStoreOwner.frame = 2;
+		recStoreOwner.lineOne = 'Welcome to If They Only Knew Records, the best record store around';
+		recStoreOwner.lineTwo = 'I want to buy some records';
+		recStoreOwner.lineThree = 'I want to sell some records';
+		
 		// label for record number
 		var recordLabel = new Label("Records: " + records );
 		recordLabel.x = 10;
@@ -96,7 +107,13 @@ window.onload = function() {
 		
 		//updates recods lablel
 
-		recordLabel.addEventListener(Event.ENTER_FRAME, function() {
+		recordLabel.addEventListener(Event.ENTER_FRAME, function(e) {
+			records += recordInc *e.elapsed;
+			//checks record limits 
+			if (records > recordLimit) {
+				mom.lineOne = 'There is no more room in this house for records! You have to find somewhere else to keep them!';
+				records = recordLimit;
+			}
 			this.text = "Records: " +(Math.round(records*100)/100);
 		});
 		moneyLabel.addEventListener(Event.ENTER_FRAME, function(e) {
@@ -114,13 +131,16 @@ window.onload = function() {
 			//have to change the mom to be drawn after the hero
 			mom.x = momStartX+floor.x; //140 and 110 in next line are where mom stands CHANGE OT NONE MAGIC NUM
 	                mom.y = momStartY+floor.y;
+			recStoreOwner.x = 280+floor.x;
+			recStoreOwner.y = 300+floor.y;
+			
 
 			if (hero.y > hero.toY) {
 				hero.dir = DIR_UP;
 				//if mouse click and hero are close enough together, just move hero to where mouseclick happened:
 				if (Math.abs(hero.y-hero.toY) < 4) {
 					hero.y=hero.toY;
-				} else if (hero.y<game.width/3 && floor.y<0 && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+offy+Math.abs(floor.y)) == 0)) {
+				} else if (hero.y<game.width/3 && floor.y<0 && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+offy+Math.abs(floor.y)) === 0)) {
 					floor.y+=4;
 					hero.toY+=4;
 				} else {
@@ -141,7 +161,7 @@ window.onload = function() {
 				hero.dir = DIR_DOWN;
 				if (Math.abs(hero.y-hero.toY) < 4) {
 					hero.y=hero.toY;
-				} else if (hero.y>game.height -(game.height/3) && floor.height+floor.y>game.height && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+(offy*2)+Math.abs(floor.y)) == 0)){
+				} else if (hero.y>game.height -(game.height/3) && floor.height+floor.y>game.height && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+(offy*2)+Math.abs(floor.y)) === 0)){
 				floor.y -= 4;
 				hero.toY -=4;
 				}
@@ -154,7 +174,7 @@ window.onload = function() {
 				hero.dir = DIR_LEFT;
 				if (Math.abs(hero.x - hero.toX) < 4) {
 					hero.x = hero.toX;
-				} else if (hero.x<(game.width/3) && floor.x<0 && (floor.hitTest(hero.x + (offx/2)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) == 0)) {
+				} else if (hero.x<(game.width/3) && floor.x<0 && (floor.hitTest(hero.x + (offx/2)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) === 0)) {
 					floor.x+=4;
 					hero.toX +=4;
 				} else {
@@ -169,14 +189,14 @@ window.onload = function() {
 					//right of the window (game) the hero is 
 					//and if there is any floor left unseen to 
 					//the right and that there are no collisions taking place:
-					} else if(hero.x>game.width-(game.width/3) && floor.width+floor.x>game.width && (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) == 0)) {
+					} else if(hero.x>game.width-(game.width/3) && floor.width+floor.x>game.width && (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) === 0)) {
 						//scrolls the floor
 						floor.x -= 4;
 						hero.toX -=4;
 						} 
 					else {hero.x += 4;
 					if (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y))) hero.x -=4;
-				};
+				}
 			}
 ///////////////////insert collison stuff here ///////////****************
 		var npcLength = npcArray.length;
@@ -204,8 +224,6 @@ window.onload = function() {
 		floor_y_old = floor.y;
 		});
 
-
-
 		//listens for mouse click
 		game.rootScene.addEventListener(Event.TOUCH_START,function(e) {
 			hero.toX = e.x-offx ;
@@ -215,6 +233,7 @@ window.onload = function() {
 		//draw stuff!
 		game.rootScene.addChild(floor);
 		game.rootScene.addChild(mom);
+		game.rootScene.addChild(recStoreOwner);
 		game.rootScene.addChild(hero);
 //		game.rootScene.addChild(buildings);
 		game.rootScene.addChild(recordLabel);
@@ -240,10 +259,10 @@ window.onload = function() {
 		var lineA = new Label(secondLine);
 		lineA.font = "16px monospace";
 		lineA.color="rgb(255,255,0)";
-		lineA.y = question.y+32;
+		lineA.y = question.y+48;
 		lineA.width = question.width;
 		//if clicked on returnlable then goes back to root scene
-		lineA.addEventListener(Event.TOUCH_START, function(e) {
+		lineA.addEventListener(Event.TOUCH_START, function() {
 			game.popScene(game.makeDialogueScene());
 			firstReact();
 		});
@@ -251,10 +270,10 @@ window.onload = function() {
 		var lineB = new Label(thirdLine);//thirdLine);
                 lineB.font = "16px monospace";
                 lineB.color="rgb(255,255,0)";
-                lineB.y = lineA.y+32;
+                lineB.y = lineA.y+48;
 		lineB.width = question.width;
                 //if clicked on returnlable then goes back to root scene
-                lineB.addEventListener(Event.TOUCH_START, function(e) {
+                lineB.addEventListener(Event.TOUCH_START, function() {
 			game.popScene(game.makeDialogueScene());
 			secondReact();
 		});
@@ -265,7 +284,7 @@ window.onload = function() {
 		scene.addChild(lineA);
 		scene.addChild(lineB);
 		return scene;
-	} //end of makeDialogueScene
+	}; //end of makeDialogueScene
 
 	game.start();
 };
@@ -277,5 +296,4 @@ function bandName() {
 	var first = ['Liqued', 'Rancid', 'Squishy', 'Brown'];
 	var second = ['Toast', 'Brains', 'Girls', 'Bones'];
 	return first[Math.floor(Math.random()*first.length)] + ' ' + second[Math.floor(Math.random()*second.length)];
-console.log( first[Math.floor(Math.random()*first.length)] );
 }
