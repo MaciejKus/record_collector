@@ -11,13 +11,16 @@ var hero_start_y = 210;
 var offy= 32;
 var offx = 32;
 
+//starting positions
+var momStartX = 90, momStartY = 60;
+
 //used for checking for collisions in terms of y and x for hero
 var hero_x_old= -1;
 var hero_y_old = -1;
 var floor_x_old = -999;
 var floor_y_old = -999;
 
-var records = 0;
+var records = 0, recordInc = 0, money = 0, moneyInc = 0,  npcArray = [];
 
 
 enchant();
@@ -49,33 +52,68 @@ window.onload = function() {
 			1,0,2,0, //up
 			3,11,4,11]; // down
 		//////npc////////j
-		var vil = new Sprite(64,64);
-		vil.image = game.assets['spritesheet.png'];
-		vil.frame = 3;
-		vil.hit = false; //used to make sure collision event only happens once per collision
-		//////npc2////////j
-		var vil2 = new Sprite(32,32);
-		vil2.image = game.assets['chara1.png'];
-		vil2.x = 250;	
-		vil2.y = 250;
+		var mom = new Sprite(64,64);
+		mom.image = game.assets['spritesheet.png'];
+		mom.frame = 3;
+		mom.hit = false; //used to make sure collision event only happens once per collision
+		mom.lineOne = "Hello dear.";
+		mom.lineTwo = 'Hi mom, can I have an allowance?';
+		mom.lineThree = 'Hi mom, can you buy me a record?';
+//************ figure out the dialoge chain.
+		mom.resultOne = function() { 
+			if (Math.random() < 0.9) {
+				moneyInc += .00001;
+				mom.lineOne = "Honey, I hope you aren't spending all your money on those darn records";
+				mom.lineTwo = "Sure thing mom.";
+				mom.resultOne = nothing;
+				game.pushScene(game.makeDialogueScene('Sure, dear. You deserve it','Thanks mom!!','',nothing,nothing));
+			} else {
+				game.pushScene(game.makeDialogueScene('Sorry honey, maybe you can get a job somewhere?','I bet Metallica never had to get jobs',"Now Way! I'd rather listen to records",nothing,nothing));
+			}
+		};
+		mom.resultTwo = function() {
+			if (Math.random() <.4) {
+				records++;
+				mom.lineThree = '';
+				mom.resultTwo = nothing;
+				game.pushScene(game.makeDialogueScene('Sure, dear. You deserve to rock! Here is a ' + bandName() + ' record','Thanks mom!!','',nothing,nothing));
+			} else {
+				game.pushScene(game.makeDialogueScene("Sorry dear, I read records are detrimental to both the health and morals","That's only if you listen to them backwards","Inconceivable!!",nothing,nothing));
+			}
+		}
+				
+		npcArray.push(mom);
 		// label for record number
-		var recordLabel = new Label("Records: " + records);
+		var recordLabel = new Label("Records: " + records );
 		recordLabel.x = 10;
 		recordLabel.y = 10;
 		recordLabel.color = "black";
+		//label for money
+		var moneyLabel = new Label('Money:   ' + money);
+		moneyLabel.x = 10;
+		moneyLabel.y = 24;
+		moneyLabel.color = "black";
 		
 		//updates recods lablel
+
 		recordLabel.addEventListener(Event.ENTER_FRAME, function() {
-			this.text = "Records: " +records;
+			this.text = "Records: " +(Math.round(records*100)/100);
 		});
+		moneyLabel.addEventListener(Event.ENTER_FRAME, function(e) {
+			money += moneyInc * e.elapsed; //e.elapsed accounts for time so even if game
+                                                       //is not in main tab
+                                                       //money adds up
+			this.text = 'Money:   ' + (Math.round(money*100)/100);
+		});
+		
 
 		//compared x y of hero to x y of last mouse click, if difference is large enough, hero x y moves to mouse click.
 		hero.addEventListener(Event.ENTER_FRAME, function() {
-			//moves vil the same amount as floor got moved
+			//moves mom the same amount as floor got moved
 			//has to happen before floor values change or 
-			//have to change the vil to be drawn after the hero
-			vil.x = 140+floor.x; //140 and 110 in next line are where vil stands CHANGE OT NONE MAGIC NUM
-	                vil.y = 110+floor.y;
+			//have to change the mom to be drawn after the hero
+			mom.x = momStartX+floor.x; //140 and 110 in next line are where mom stands CHANGE OT NONE MAGIC NUM
+	                mom.y = momStartY+floor.y;
 
 			if (hero.y > hero.toY) {
 				hero.dir = DIR_UP;
@@ -140,23 +178,20 @@ window.onload = function() {
 					if (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y))) hero.x -=4;
 				};
 			}
-
-		//test for collisions between sprites and 
-		//runs appropriate function if collision occures:
-		//only runs if vil.hit is false, that is event only happens
-		//once per collision
-		if(hero.within(vil, 15) ) { //CHANGE MAGIC NUMBER 15
-			if (!vil.hit) { 
-				var addOne = function() {
-					records++;
+///////////////////insert collison stuff here ///////////****************
+		var npcLength = npcArray.length;
+		for (var i = 0; i < npcLength; i++ ) {
+			var curNpc = npcArray[i];
+			if(hero.within(curNpc, 15) ) { //CHANGE MAGIC NUMBER 15
+				if (!curNpc.hit) { 
+					game.pushScene(game.makeDialogueScene(curNpc.lineOne,curNpc.lineTwo,curNpc.lineThree, curNpc.resultOne,curNpc.resultTwo)); //ADDS DIALGE BOX
+					curNpc.hit = true;
 				}
-				game.pushScene(game.makeDialogueScene('test text','wwww','something', addOne)); //ADDS DIALGE BOX
-				vil.hit = true;
+				// CREATE VARIABLE COLISION = TRUE
+			} else {
+				curNpc.hit = false;
 			}
-			// CREATE VARIABLE COLISION = TRUE
-		} else {
-			vil.hit = false;
-		}
+		}// end of for npcLength
 
 		//stops animation of hero sprite if location of hero and x,y 
 		//values of floor havent changed since last frame (if floor hasnt moved):
@@ -179,18 +214,18 @@ window.onload = function() {
 
 		//draw stuff!
 		game.rootScene.addChild(floor);
-		game.rootScene.addChild(vil);
-		game.rootScene.addChild(vil2);
+		game.rootScene.addChild(mom);
 		game.rootScene.addChild(hero);
 //		game.rootScene.addChild(buildings);
 		game.rootScene.addChild(recordLabel);
+		game.rootScene.addChild(moneyLabel);
 	}; //end rootScene
 
 	//dialogue box for when collision with sprit happens
 	//takes 3 dialogue lines plus what happens function 
-	game.makeDialogueScene = function (firstLine,secondLine,thirdLine,whatHappens) {
+	game.makeDialogueScene = function (firstLine,secondLine,thirdLine,firstReact,secondReact) {
 		var scene = new Scene();
-		var bg = new Map(16,16);
+	//	var bg = new Map(16,16);
 
 		var question = new Label(firstLine);
 		question.font = "16px monospace";
@@ -198,38 +233,49 @@ window.onload = function() {
 		question.backgroundColor = "rgba(0,0,0,0.8)";
 		//makes the question object be large enough to fill bottom of screen
 		//MAKE THESE NOT MAGIC NUMBERS
-		question.y = 200 ;
+		question.y = 400 ;
 		question.width = game.width;
-		question.height = game.height - 200;
+		question.height = game.height - 400;
 
-		var returnLabel = new Label(secondLine);
-		returnLabel.font = "16px monospace";
-		returnLabel.color="rgb(255,255,255)";
-		returnLabel.y = 216;
+		var lineA = new Label(secondLine);
+		lineA.font = "16px monospace";
+		lineA.color="rgb(255,255,0)";
+		lineA.y = question.y+32;
+		lineA.width = question.width;
 		//if clicked on returnlable then goes back to root scene
-		returnLabel.addEventListener(Event.TOUCH_START, function(e) {
-			whatHappens();
+		lineA.addEventListener(Event.TOUCH_START, function(e) {
 			game.popScene(game.makeDialogueScene());
+			firstReact();
 		});
 
-		var lastLabel = new Label("hhhhffffhhhhtttttjjjj333nnnssss111223thisistheend");//thirdLine);
-                lastLabel.font = "16px monospace";
-                lastLabel.color="rgb(255,255,255)";
-                lastLabel.y = 270;
+		var lineB = new Label(thirdLine);//thirdLine);
+                lineB.font = "16px monospace";
+                lineB.color="rgb(255,255,0)";
+                lineB.y = lineA.y+32;
+		lineB.width = question.width;
                 //if clicked on returnlable then goes back to root scene
-                lastLabel.addEventListener(Event.TOUCH_START, function(e) {
+                lineB.addEventListener(Event.TOUCH_START, function(e) {
 			game.popScene(game.makeDialogueScene());
-			game.pushScene(game.makeDialogueScene('x text','22 text','nothing', function() {records++;} ));
+			secondReact();
 		});
 
 
 		//draws scene stuff
 		scene.addChild(question);
-		scene.addChild(returnLabel);
-		scene.addChild(lastLabel);
+		scene.addChild(lineA);
+		scene.addChild(lineB);
 		return scene;
 	} //end of makeDialogueScene
 
 	game.start();
 };
 
+var nothing = function() {};
+
+//creates random band name
+function bandName() {
+	var first = ['Liqued', 'Rancid', 'Squishy', 'Brown'];
+	var second = ['Toast', 'Brains', 'Girls', 'Bones'];
+	return first[Math.floor(Math.random()*first.length)] + ' ' + second[Math.floor(Math.random()*second.length)];
+console.log( first[Math.floor(Math.random()*first.length)] );
+}
