@@ -64,29 +64,43 @@ window.onload = function() {
 			npcArray[i].image = game.assets['spritesheet.png'];
 		}
  		
-		allowanceFunc = function() { 
-			if (Math.random() < 0.9) {
+		mom.allowanceFunc = function() { 
+			if (Math.random() < 0.2) {
 				moneyInc += 0.00001;
-				mom.dialogue[0] = "Honey, I hope you aren't spending all your money on those darn records";
-				mom.lineTwo[1][allowance] = ["Sure thing mom.",nothing];
-				game.pushScene(game.makeDialogueScene(['Sure, dear. You deserve it',[{a:['Thanks mom!!',nothing]}]]));
+				mom.dialogue.question = "Honey, I hope you aren't spending all your money on those darn<br>records";
+				mom.dialogue.allowance = ["Sure thing mom.",nothing];
+				game.pushScene(game.makeDialogueScene({
+					question:'Sure, dear. You deserve it',
+					a:['Thanks mom!!',nothing]
+				}));
 			} else {
-				game.pushScene(game.makeDialogueScene(['Sorry honey, maybe you can get a job somewhere?',[{a:['I bet Metallica never had to get jobs',nothing]},{b:["Now Way! I'd rather listen to records",nothing]}]]));
+				game.pushScene(game.makeDialogueScene({
+					question:'Sorry honey, maybe you can get a job somewhere?',
+					a:['I bet Metallica never had to get jobs',nothing],
+					b:["Now Way! I'd rather listen to records",nothing]
+				}));
 			}
 		};
-		momRecord = function() {
+		mom.recordFunc = function() {
 			if (Math.random() < 0.4) {
 				records++;
 				delete mom.dialogue.record;
-				game.pushScene(game.makeDialogueScene({question:'Sure, dear. You deserve to rock! Here is a ' + bandName() + ' record',a:['Thanks mom!!',nothing]}));
+				game.pushScene(game.makeDialogueScene({
+					question:'Sure, dear. You deserve to rock! Here is a ' + bandName() + ' record',
+					a:['Thanks mom!!',nothing]
+				}));
 			} else {
-				game.pushScene(game.makeDialogueScene("Sorry dear, I read records are detrimental to both the health and morals","That's only if you listen to them backwards","Inconceivable!!",nothing,nothing));
+				game.pushScene(game.makeDialogueScene({
+					question:"Sorry dear, I read records are detrimental to both the health and<br>morals",
+					a:["That's only if you listen to them backwards",nothing],
+					b:["Inconceivable!!",nothing]
+				}));
 			}
 		};
 		mom.dialogue = {
 			question: "Hello dear.",
-			allowance: ['Hi mom, can I have an allowance?', allowanceFunc],
-			record: ['Hi mom, can you buy me a record?', momRecord]
+			allowance: ['Hi mom, can I have an allowance?', mom.allowanceFunc],
+			record: ['Hi mom, can you buy me a record?', mom.recordFunc]
 		};
 
 		recStoreOwner.dialogue = {
@@ -111,7 +125,7 @@ window.onload = function() {
 			records += recordInc *e.elapsed;
 			//checks record limits 
 			if (records > recordLimit) {
-				mom.lineOne = 'There is no more room in this house for records! You have to find somewhere else to keep them!';
+				mom.dialogue.question = 'There is no more room in this house for records! You have to find somewhere else to keep them!';
 				records = recordLimit;
 			}
 			this.text = "Records: " +(Math.round(records*100)/100);
@@ -141,7 +155,7 @@ window.onload = function() {
 				//if mouse click and hero are close enough together, just move hero to where mouseclick happened:
 				if (Math.abs(hero.y-hero.toY) < heroSpeed) {
 					hero.y=hero.toY;
-				} else if (hero.y<game.width/3 && floor.y<0 && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+offy+Math.abs(floor.y)) == false)) {
+				} else if (hero.y<game.width/3 && floor.y<0 && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+offy+Math.abs(floor.y)) === false)) {
 					floor.y += heroSpeed;
 					hero.toY += heroSpeed;
 				} else {
@@ -162,7 +176,7 @@ window.onload = function() {
 				hero.dir = DIR_DOWN;
 				if (Math.abs(hero.y-hero.toY) < heroSpeed) {
 					hero.y=hero.toY;
-				} else if (hero.y>game.height -(game.height/3) && floor.height+floor.y>game.height && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+(offy*2)+Math.abs(floor.y)) == false)){
+				} else if (hero.y>game.height -(game.height/3) && floor.height+floor.y>game.height && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+(offy*2)+Math.abs(floor.y)) === false)){
 				floor.y -= heroSpeed;
 				hero.toY -=heroSpeed;
 				}
@@ -175,7 +189,7 @@ window.onload = function() {
 				hero.dir = DIR_LEFT;
 				if (Math.abs(hero.x - hero.toX) < heroSpeed) {
 					hero.x = hero.toX;
-				} else if (hero.x<(game.width/3) && floor.x<0 && (floor.hitTest(hero.x + (offx/2)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) == false)) {
+				} else if (hero.x<(game.width/3) && floor.x<0 && (floor.hitTest(hero.x + (offx/2)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) === false)) {
 					floor.x+=heroSpeed;
 					hero.toX +=heroSpeed;
 				} else {
@@ -190,7 +204,7 @@ window.onload = function() {
 					//right of the window (game) the hero is 
 					//and if there is any floor left unseen to 
 					//the right and that there are no collisions taking place:
-					} else if(hero.x>game.width-(game.width/3) && floor.width+floor.x>game.width && (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) == false)) {
+					} else if(hero.x>game.width-(game.width/3) && floor.width+floor.x>game.width && (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) === false)) {
 						//scrolls the floor
 						floor.x -= heroSpeed;
 						hero.toX -= heroSpeed;
@@ -262,7 +276,6 @@ window.onload = function() {
 			talk[i] = new Label(dialogueIn[keys[i]][0]);
 			talk[i].font = "16px monospace";
 			talk[i].color = "rgb(255,255,0)";
-			talk[i].backgroundColor = "rgba(0,0,0,0.8)";
 			talk[i].y = (startY += incrementY);
 			talk[i].width = game.width;
 			talk[i].height = game.height - 400; //400 = game not covered by text
@@ -271,8 +284,8 @@ window.onload = function() {
 		for (var i = 1; i < keys.length; i++ ) {
 			(function(i){ //dealing with a closure
 				talk[i].addEventListener(Event.TOUCH_START, function() {
-					dialogueIn[keys[i]][1]();
 					game.popScene();//(game.makeDialogueScene);
+					dialogueIn[keys[i]][1]();
 				});
 			})(i);
 		}
