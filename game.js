@@ -6,7 +6,7 @@ var DIR_DOWN = 3;
 //where hero starts minus 16
 var heroStartX = 200;
 var heroStartY = 210;
-var heroSpeed = 4;
+var heroSpeed = 8;
 
 //how much sprite images are ofset
 var offy= 32;
@@ -141,7 +141,7 @@ window.onload = function() {
 				//if mouse click and hero are close enough together, just move hero to where mouseclick happened:
 				if (Math.abs(hero.y-hero.toY) < heroSpeed) {
 					hero.y=hero.toY;
-				} else if (hero.y<game.width/3 && floor.y<0 && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+offy+Math.abs(floor.y)) === 0)) {
+				} else if (hero.y<game.width/3 && floor.y<0 && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+offy+Math.abs(floor.y)) == false)) {
 					floor.y += heroSpeed;
 					hero.toY += heroSpeed;
 				} else {
@@ -162,7 +162,7 @@ window.onload = function() {
 				hero.dir = DIR_DOWN;
 				if (Math.abs(hero.y-hero.toY) < heroSpeed) {
 					hero.y=hero.toY;
-				} else if (hero.y>game.height -(game.height/3) && floor.height+floor.y>game.height && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+(offy*2)+Math.abs(floor.y)) === 0)){
+				} else if (hero.y>game.height -(game.height/3) && floor.height+floor.y>game.height && (floor.hitTest(hero.x + offx+Math.abs(floor.x), hero.y+(offy*2)+Math.abs(floor.y)) == false)){
 				floor.y -= heroSpeed;
 				hero.toY -=heroSpeed;
 				}
@@ -175,7 +175,7 @@ window.onload = function() {
 				hero.dir = DIR_LEFT;
 				if (Math.abs(hero.x - hero.toX) < heroSpeed) {
 					hero.x = hero.toX;
-				} else if (hero.x<(game.width/3) && floor.x<0 && (floor.hitTest(hero.x + (offx/2)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) === 0)) {
+				} else if (hero.x<(game.width/3) && floor.x<0 && (floor.hitTest(hero.x + (offx/2)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) == false)) {
 					floor.x+=heroSpeed;
 					hero.toX +=heroSpeed;
 				} else {
@@ -190,7 +190,7 @@ window.onload = function() {
 					//right of the window (game) the hero is 
 					//and if there is any floor left unseen to 
 					//the right and that there are no collisions taking place:
-					} else if(hero.x>game.width-(game.width/3) && floor.width+floor.x>game.width && (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) === 0)) {
+					} else if(hero.x>game.width-(game.width/3) && floor.width+floor.x>game.width && (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y)) == false)) {
 						//scrolls the floor
 						floor.x -= heroSpeed;
 						hero.toX -= heroSpeed;
