@@ -22,8 +22,7 @@ var floor_x_old = -999;
 var floor_y_old = -999;
 
 //other variables:
-var records = 0, recordInc = 0, money = 0, moneyInc = 0, recCost = 2, recMultiplier = 1;
-var recordLimit = 50; //recordLimit is the amount of storage space for records. 
+var records = 100020, recordInc = 0, money = 122220, moneyInc = 0, recCost = 2, recMultiplier = 1, recordLimit = 5000000; 
 
 
 enchant();
@@ -57,9 +56,41 @@ window.onload = function() {
 			var index = npcArray.indexOf('recStoreOnwer');
 			npcArray.splice(index, 1);
 			money -= 100;
-			recordInc += .0008;
+			recordInc += 0.0008;
 			recordLimit += 1000;
-		}
+		};
+		hero.buyLabel = function() {
+			var endText = [ 'After all that work you are left with about $3.50<br> and a single Creed record.<br>The End','You spend all your money on hookers and blow','You get laid off','Your board of directors decides <br>they have had enough','You party with rock stars','You make tons of money doing next to nothing','You become CEO of Corporate Label Inc'];
+			for (var i =0, j = endText.length; i < j; i ++) {
+				var endScene = new Scene();
+				var label = new Label(endText[i]);
+				endScene.backgroundColor = 'black';
+				label.font = '20px monospace';
+				label.textAlign = 'center';
+				label.color = 'rgb(128,128,128)';
+				label.width = game.width-40;
+				label.y = 200;
+				endScene.addChild(label);
+				game.pushScene(endScene);
+				//removes above scenes, one per click
+				if (i!==0) { //skip last scene so it sticks	
+					endScene.addEventListener(Event.TOUCH_START, function() {
+						game.popScene();  //doesnt remove last scene;
+					});	
+				}
+			}
+		};
+		hero.sellCollection = function() {
+			var endScene = new Scene();
+			var label = new Label('<br> You sell your records<br> You notice how much more to life there is than collecting things<br> You join collectors anonymous<br> You realize today is the first day of the rest of your life<br> You go outside and enjoy life');
+			label.font = '20px monospace';
+			label.color = 'rgb(128,128,128)';
+			label.backgroundColor = "rgb(0,0,0)";
+			label.width = game.width;
+			label.height = game.height;
+			endScene.addChild(label);
+			game.pushScene(endScene);
+		};
 		//////npc////////j
 		var mom = new Sprite(64,64);
 		mom.frame = 3;
@@ -131,7 +162,6 @@ window.onload = function() {
 		};
 ///////////////////recStoreOwner dialogue//////////
 		recStoreOwner.buy = function() {
-console.log(recCost);
 			if (money < recCost*recMultiplier) {
 				game.pushScene(game.makeDialogueScene({
                         	        question: 'Sorry, you cannot afford any records from us',
@@ -140,10 +170,11 @@ console.log(recCost);
                       	 	 }));
 			} else  {
 				//changes text when over 100 records
+				var buyQuestion;
 				if (records < 100) {
-					var buyQuestion = 'We got a great sale going on right now. Only ' + recCost + ' dollars per <br>record!';
+					buyQuestion = 'We got a great sale going on right now. Only ' + recCost + ' dollars per <br>record!';
 				} else {
-					var buyQeustion = 'Good records are hard to find. We are selling them for ' +recCost + ' dollars per record';
+					buyQeustion = 'Good records are hard to find. We are selling them for ' +recCost + ' dollars per record';
 				}
 				game.pushScene(game.makeDialogueScene({
 					question: buyQuestion,
@@ -183,7 +214,7 @@ console.log(recCost);
 				game.pushScene(workScene);
 			}
 			//removes above scenes, one per second
-			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt);}; }, 1000);
+			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt)}; }, 1000);
 		}; //end work
 		recStoreOwner.job = function() {
 			game.pushScene(game.makeDialogueScene({
@@ -191,14 +222,14 @@ console.log(recCost);
 				r: ['I will work for records', function() {recStoreOwner.work(); records+=recMultiplier/2;}],
 				m: ['I will work for money', function() {recStoreOwner.work(); money+=recCost/2;}],
 				n: ['I dont want to be a wage slave', nothing]
-			}))
+			}));
 		};
 		recStoreOwner.buyShop = function() {
 			game.pushScene(game.makeDialogueScene({
 				question: 'You punk kid! You got more records than I do. This store does not make any money, but a lot of people trade in their old records. Fine, I will sell for 100 dollars.',
 				y: ['Sucker, you got a deal', hero.hasRecStore],
 				n: ['JK, LOL, not interesed', nothing]
-			}))
+			}));
 		};
 		recStoreOwner.dialogue = {
 			question: 'Welcome to If They Only Knew Records, the best record store <br>around',
@@ -239,12 +270,15 @@ console.log(recCost);
 		};
 
 ///////////////////////labelLady dialogue//////////////
+		labelLady.sellOut = function() {
+				
+		};
 		labelLady.gotRecord = function() {
 			game.pushScene(game.makeDialogueScene({
 				question : 'I looove Barry White! Thanks a bunch, I will call my boyfriend <br>right now and thank him!',
 				a: ['No problemo, lady.',nothing]
 			}));
-			labelLady.dialogue.question = 'Sorry kid, I cant let you in here. Only rock stars and <br>millionaires are allowed in here.';
+			labelLady.dialogue.question = 'Sorry kid, no time to talk to the likes of you. Only rock stars and <br>millionaires are allowed in here.';
 			labelLady.dialogue.a = ['AKA wimps and posers!',nothing];
 			swapGuy.dialogue.question = 'Hey kid, what can I do you for?';
 			swapGuy.dialogue.y = ['Your girlfriend loved the record you sent her', swapGuy.tip];
@@ -285,6 +319,17 @@ console.log(recCost);
 				recStoreOwner.dialogue.j = ['I want to buy your shop!',recStoreOwner.buyShop];
 			} else {
 				recStoreOwner.dialogue.j = ['Can I do some work around here?',recStoreOwner.job];
+			}
+			if (money > 10000 || records > 10000) {
+				labelLady.dialogue.question = 'Wow, you sure have done well for yourself. How can Corporate <br>Label Inc. help you?';
+				if (money > 10000) {
+					labelLady.dialogue.a = ['I want to buy this record label and become CEO!', hero.buyLabel];
+				}
+				if (records > 10000) {
+					labelLady.dialogue.b = ['I want to sell my whole record collection', hero.sellCollection];
+				} else { 
+					delete labelLady.dialogue.b;
+				}
 			}
 			this.text = "Records: " +(Math.round(records*100)/100);
 		});
@@ -411,7 +456,7 @@ console.log(recCost);
 
 		//draw stuff!
 		game.rootScene.addChild(floor);
-		for (var i=0; i < npcCount; i++) {
+		for (i=0; i < npcCount; i++) {
 			game.rootScene.addChild(npcArray[i]);
 		}
 		game.rootScene.addChild(hero);
@@ -430,7 +475,7 @@ console.log(recCost);
 		var incrementY = 48;
 		var keys = Object.keys(dialogueIn);
 		var talk = [];
-		talk[0] = new Label(dialogueIn['question']); //queston is not clickable and white
+		talk[0] = new Label(dialogueIn.question); //queston is not clickable and white
 		talk[0].font = "16px monospace";
 		talk[0].color = "rgb(255,255,255)";
 		talk[0].backgroundColor = "rgba(0,0,0,0.8)";
@@ -438,7 +483,7 @@ console.log(recCost);
 		talk[0].width = game.width;
 		talk[0].height = game.height - 400; //400 = game not covered by text
                 scene.addChild(talk[0]);
-		for (var i = 1, ii = keys.length; i < ii; i++ ) {
+		for (i = 1, ii = keys.length; i < ii; i++ ) {
 			talk[i] = new Label(dialogueIn[keys[i]][0]);
 			talk[i].font = "16px monospace";
 			talk[i].color = "rgb(255,255,0)";
