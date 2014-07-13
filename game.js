@@ -51,6 +51,15 @@ window.onload = function() {
 			9,8,10,8, //right
 			1,0,2,0, //up
 			3,11,4,11]; // down
+		//what hapens when hero buys record store
+		hero.hasRecStore = function() {
+			game.rootScene.removeChild(recStoreOwner);
+			var index = npcArray.indexOf('recStoreOnwer');
+			npcArray.splice(index, 1);
+			money -= 100;
+			recordInc += .0008;
+			recordLimit += 1000;
+		}
 		//////npc////////j
 		var mom = new Sprite(64,64);
 		mom.frame = 3;
@@ -68,14 +77,12 @@ window.onload = function() {
 		labelLady.frame = 2;
 		var rockerGuy = new Sprite(64,64);
 		rockerGuy.frame = 2;
-		var sketchyGuy = new Sprite(64,64);
-		sketchyGuy.frame = 2;
 		var recordStoreRecords = new Sprite(64,64); //records you can interact with
 		recordStoreRecords.frame = 2;
 		var freeRecord = new Sprite(64,64); //find a free record on the street
 		freeRecord.frame = 2;
-		//var npcArray = [mom, recStoreOwner,swapGuy,storageGuy,internetGuy,cuteGirl,labelLady,rockerGuy,sketchyGuy,recordStoreRecords,freeRecord];
-		var npcArray = [mom, recStoreOwner,freeRecord];
+		var npcArray = [mom, recStoreOwner,swapGuy,storageGuy,internetGuy,cuteGirl,labelLady,rockerGuy,recordStoreRecords,freeRecord];
+		//var npcArray = [mom, recStoreOwner,freeRecord,swapGuy];
 		var npcCount = npcArray.length;
 		for (var i =0; i < npcCount; i++) {
 			npcArray[i].hit = false; //makes sure collision result only happens once per touch
@@ -160,7 +167,6 @@ console.log(recCost);
                                         c: ['I need better prices than those. Maybe another time.', nothing]
                                 }));
 			}
-			
 		}; //end sell
 		recStoreOwner.work = function() {
 			var seconds = 15;
@@ -186,14 +192,68 @@ console.log(recCost);
 				m: ['I will work for money', function() {recStoreOwner.work(); money+=recCost/2;}],
 				n: ['I dont want to be a wage slave', nothing]
 			}))
-		}
+		};
+		recStoreOwner.buyShop = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: 'You punk kid! You got more records than I do. This store does not make any money, but a lot of people trade in their old records. Fine, I will sell for 100 dollars.',
+				y: ['Sucker, you got a deal', hero.hasRecStore],
+				n: ['JK, LOL, not interesed', nothing]
+			}))
+		};
 		recStoreOwner.dialogue = {
 			question: 'Welcome to If They Only Knew Records, the best record store <br>around',
 			b: ['I want to buy some records',recStoreOwner.buy],
 			s: ['I want to sell some records', recStoreOwner.sell],
 			j: ['I want a job', recStoreOwner.job]
 		};
-///////////////////////
+///////////////////////swapGuy dialogue //////////////////
+		swapGuy.quest = false;
+		swapGuy.swap = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: 'Mondo cool! If you give me a box of ' + (20 * recCost) + ' records, I can wheel and deal and slowly increase your collection',
+				y: ['Off the hook! its a deal', function() {records-= (20 * recCost); recordInc += (.0001 * recCost);}],
+				n: ['Bummer. I dont really want to do that', nothing]
+			}));
+		};
+		swapGuy.tookRecord = function() {
+			swapGuy.quest = true;
+			labelLady.dialogue.a = ['Your boyfriend told asked me to give you this record', labelLady.gotRecord];
+			swapGuy.dialogue.question = 'You deliver that record to my lady yet?';
+			swapGuy.dialogue.y = ['Working on it',nothing];
+			delete swapGuy.dialogue.n;
+		};			
+		swapGuy.tip = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: 'Wicked fresh! have a Killed by Death record for your troubles',
+				a: ['Hella tight! Thanks homie', nothing]
+			}));
+			swapGuy.dialogue.question = 'What is up brah?';
+			swapGuy.dialogue.y = ['I got some records I want to swap',swapGuy.swap];
+			swapGuy.dialogue.n = ['Just wanted to tell you my new favorite band is ' + bandName(), nothing];
+//////////ADD +! FOR GETTING KILLED BY DEATH HERE
+		};
+		swapGuy.dialogue = {
+			question: 'Hey, I run a booth at the swapmeet here. Can you deliver this <br>Barry White record to my girlfriend at the record label for me?',
+			y: ['Sure, I can do that for you', swapGuy.tookRecord ],
+			n: ['I dont have the time', nothing]
+		};
+
+///////////////////////labelLady dialogue//////////////
+		labelLady.gotRecord = function() {
+			game.pushScene(game.makeDialogueScene({
+				question : 'I looove Barry White! Thanks a bunch, I will call my boyfriend <br>right now and thank him!',
+				a: ['No problemo, lady.',nothing]
+			}));
+			labelLady.dialogue.question = 'Sorry kid, I cant let you in here. Only rock stars and <br>millionaires are allowed in here.';
+			labelLady.dialogue.a = ['AKA wimps and posers!',nothing];
+			swapGuy.dialogue.question = 'Hey kid, what can I do you for?';
+			swapGuy.dialogue.y = ['Your girlfriend loved the record you sent her', swapGuy.tip];
+		}
+		labelLady.dialogue = {
+			question: 'Welcome to Corporate Label Inc. We make big money! We dont have time for you right now.',
+			a: ['Only sellouts hang out here anyway',nothing]
+		}
+
 ///////////////////////freeRecord dialogue///////////
 		freeRecord.dialogue = {
 			question: 'Cool, a ' + realBands() + ' record!',
@@ -216,8 +276,15 @@ console.log(recCost);
 			records += recordInc *e.elapsed;
 			//checks record limits 
 			if (records > recordLimit) {
-				mom.dialogue.question = 'There is no more room in this house for records! You have to find somewhere else to keep them!';
+				mom.dialogue.question = 'There is no more room in this house for records! You have to <br>find somewhere else to keep them!';
 				records = recordLimit;
+			} else {
+				mom.dialogue.question = 'Honey, I dont like this record obsession. Why not try cookie collecting instead?';
+			}
+			if (money > 1) {
+				recStoreOwner.dialogue.j = ['I want to buy your shop!',recStoreOwner.buyShop];
+			} else {
+				recStoreOwner.dialogue.j = ['Can I do some work around here?',recStoreOwner.job];
 			}
 			this.text = "Records: " +(Math.round(records*100)/100);
 		});
@@ -241,6 +308,10 @@ console.log(recCost);
 			recStoreOwner.y = 300+floor.y;
 			freeRecord.x = 400+floor.x;
 			freeRecord.y = 410+floor.y;
+			swapGuy.x = 150+floor.x;
+			swapGuy.y = 40+floor.y; //make all this into a single loop 
+			labelLady.x = 200+floor.x;
+			labelLady.y = 250+floor.y;
 			
 
 			if (hero.y > hero.toY) {
@@ -377,6 +448,7 @@ console.log(recCost);
 			scene.addChild(talk[i]);
 		}
 		for (var i = 1; i < keys.length; i++ ) {
+//console.log(keys[i][0]);
 			(function(i){ //dealing with a closure
 				talk[i].addEventListener(Event.TOUCH_START, function() {
 					game.popScene();
