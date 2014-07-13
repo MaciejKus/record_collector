@@ -22,7 +22,7 @@ var floor_x_old = -999;
 var floor_y_old = -999;
 
 //other variables:
-var records = 0, recordInc = 0, money = 0, moneyInc = 0;
+var records = 0, recordInc = 0, money = 0, moneyInc = 0, recCost = 2, recMultiplier = 1;
 var recordLimit = 50; //recordLimit is the amount of storage space for records. 
 
 
@@ -56,14 +56,32 @@ window.onload = function() {
 		mom.frame = 3;
 		var recStoreOwner = new Sprite(64,64);
 		recStoreOwner.frame = 2;
-		var npcArray = [mom, recStoreOwner];
+		var swapGuy = new Sprite(64,64);
+		swapGuy.frame = 2;
+		var storageGuy = new Sprite(64,64);
+		storageGuy.frame = 2;
+		var internetGuy = new Sprite(64,64);
+		internetGuy.frame = 2;
+		var cuteGirl = new Sprite(64,64);
+		cuteGirl.frame = 2;
+		var labelLady = new Sprite(64,64);
+		labelLady.frame = 2;
+		var rockerGuy = new Sprite(64,64);
+		rockerGuy.frame = 2;
+		var sketchyGuy = new Sprite(64,64);
+		sketchyGuy.frame = 2;
+		var recordStoreRecords = new Sprite(64,64); //records you can interact with
+		recordStoreRecords.frame = 2;
+		var freeRecord = new Sprite(64,64); //find a free record on the street
+		freeRecord.frame = 2;
+		//var npcArray = [mom, recStoreOwner,swapGuy,storageGuy,internetGuy,cuteGirl,labelLady,rockerGuy,sketchyGuy,recordStoreRecords,freeRecord];
+		var npcArray = [mom, recStoreOwner,freeRecord];
 		var npcCount = npcArray.length;
-		//Sprite.prototype.hit = false;
 		for (var i =0; i < npcCount; i++) {
 			npcArray[i].hit = false; //makes sure collision result only happens once per touch
 			npcArray[i].image = game.assets['spritesheet.png'];
 		}
- 		
+/////////////mom dialogue/////// 		
 		mom.allowanceFunc = function() { 
 			if (Math.random() < 0.2) {
 				moneyInc += 0.00001;
@@ -74,10 +92,12 @@ window.onload = function() {
 					a:['Thanks mom!!',nothing]
 				}));
 			} else {
+				coolBan = ['REM', 'Iron Maiden', 'The Clash', 'Wu Tang', 'Black Sabbath'];
+				lameBan = ['Justin Bieber', 'Winger', 'Stryper', 'ICP'];
 				game.pushScene(game.makeDialogueScene({
 					question:'Sorry honey, maybe you can get a job somewhere?',
-					a:['I bet Metallica never had to get jobs',nothing],
-					b:["Now Way! I'd rather listen to records",nothing]
+					a:['I bet ' + randChoice(coolBan) + ' never had to get jobs',nothing],
+					b:["Now Way! I'd rather listen to " + randChoice(lameBan) ,nothing]
 				}));
 			}
 		};
@@ -102,13 +122,84 @@ window.onload = function() {
 			allowance: ['Hi mom, can I have an allowance?', mom.allowanceFunc],
 			record: ['Hi mom, can you buy me a record?', mom.recordFunc]
 		};
-
+///////////////////recStoreOwner dialogue//////////
+		recStoreOwner.buy = function() {
+console.log(recCost);
+			if (money < recCost*recMultiplier) {
+				game.pushScene(game.makeDialogueScene({
+                        	        question: 'Sorry, you cannot afford any records from us',
+                        	        b: ['Capitalist pig-dog!!', nothing],
+                        	        a: ['The best things in life are free... But I want the money', nothing]
+                      	 	 }));
+			} else  {
+				//changes text when over 100 records
+				if (records < 100) {
+					var buyQuestion = 'We got a great sale going on right now. Only ' + recCost + ' dollars per <br>record!';
+				} else {
+					var buyQeustion = 'Good records are hard to find. We are selling them for ' +recCost + ' dollars per record';
+				}
+				game.pushScene(game.makeDialogueScene({
+					question: buyQuestion,
+					a: ['Great I will buy ' + recMultiplier + ' ' + bandName() + ' records!', function() { money -= recMultiplier * recCost; records+= recMultiplier;}],
+					b: ['Cool I will buy ' + (recMultiplier*2) + ' ' + bandName() + ' records!', function() { money -= 2*recMultiplier * recCost; records+= 2*recMultiplier;}],
+					c: ['Too expensive, maybe another time.', nothing]
+				}));	
+			}
+		}; //end buy
+		recStoreOwner.sell = function() {
+			if (records < 1) {
+				 game.pushScene(game.makeDialogueScene({
+                                        question: "We both know you only have mp3s, and no records",
+                                        b: ['This store sucks!', nothing]
+                                 }));
+                        } else  {
+				game.pushScene(game.makeDialogueScene({
+                                        question: 'Ok, lets look at your posuer collection... hmm..<br>I will give you ' + recCost/2 + ' dollars per record.',
+                                        a: ['Neat I will sell ' + recMultiplier + ' ' + bandName() + ' records!', function() { money += recMultiplier * recCost/2; records-= recMultiplier;}],
+                                        b: ['OK I will sell ' + (recMultiplier*2) + ' ' + bandName() + ' records!', function() { money += recMultiplier * recCost; records-= 2*recMultiplier;}],
+                                        c: ['I need better prices than those. Maybe another time.', nothing]
+                                }));
+			}
+			
+		}; //end sell
+		recStoreOwner.work = function() {
+			var seconds = 15;
+			//create x amount of scenes on top of one another
+			for (var i =0; i < seconds; i++){
+				var workScene = new Scene();
+				var label = new Label('<br> Working hard, please wait ' + i + ' seconds');
+				label.font = '24px monospace';
+				label.color = 'rgb(255,200,0)';
+				label.backgroundColor = "rgb(0,0,0)";
+				label.width = game.width;
+				label.height = game.height;
+				workScene.addChild(label);
+				game.pushScene(workScene);
+			}
+			//removes above scenes, one per second
+			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt);}; }, 1000);
+		}; //end work
+		recStoreOwner.job = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: 'I will pay you ' + recMultiplier/2 + '  records or ' +  (recCost/2)  + ' dollars to work right now',
+				r: ['I will work for records', function() {recStoreOwner.work(); records+=recMultiplier/2;}],
+				m: ['I will work for money', function() {recStoreOwner.work(); money+=recCost/2;}],
+				n: ['I dont want to be a wage slave', nothing]
+			}))
+		}
 		recStoreOwner.dialogue = {
-			question: 'Welcome to If They Only Knew Records, the best record store around',
-			buy: ['I want to buy some records',function() {records++;}],
-			sell: ['I want to sell some records', nothing]
+			question: 'Welcome to If They Only Knew Records, the best record store <br>around',
+			b: ['I want to buy some records',recStoreOwner.buy],
+			s: ['I want to sell some records', recStoreOwner.sell],
+			j: ['I want a job', recStoreOwner.job]
 		};
-		
+///////////////////////
+///////////////////////freeRecord dialogue///////////
+		freeRecord.dialogue = {
+			question: 'Cool, a ' + realBands() + ' record!',
+			take: ["I'm adding this to my collection!", function() {records++; game.rootScene.removeChild(freeRecord); npcArray.pop();}],
+			leave: ['I always hated this record', function() {game.rootScene.removeChild(freeRecord); npcArray.pop();}]
+		};
 		// label for record number
 		var recordLabel = new Label("Records: " + records );
 		recordLabel.x = 10;
@@ -148,6 +239,8 @@ window.onload = function() {
 	                mom.y = momStartY+floor.y;
 			recStoreOwner.x = 280+floor.x;
 			recStoreOwner.y = 300+floor.y;
+			freeRecord.x = 400+floor.x;
+			freeRecord.y = 410+floor.y;
 			
 
 			if (hero.y > hero.toY) {
@@ -247,12 +340,14 @@ window.onload = function() {
 
 		//draw stuff!
 		game.rootScene.addChild(floor);
-		game.rootScene.addChild(mom);
-		game.rootScene.addChild(recStoreOwner);
+		for (var i=0; i < npcCount; i++) {
+			game.rootScene.addChild(npcArray[i]);
+		}
 		game.rootScene.addChild(hero);
-//		game.rootScene.addChild(buildings);
 		game.rootScene.addChild(recordLabel);
 		game.rootScene.addChild(moneyLabel);
+		recCost = (Math.floor(records/20) + 2); //increase cost of records. maybe move this?
+		recMultiplier = 1 + Math.floor(records/10); //increases exchange amounts
 	}; //end rootScene
 
 	//dialogue box for when collision with sprit happens
@@ -284,7 +379,7 @@ window.onload = function() {
 		for (var i = 1; i < keys.length; i++ ) {
 			(function(i){ //dealing with a closure
 				talk[i].addEventListener(Event.TOUCH_START, function() {
-					game.popScene();//(game.makeDialogueScene);
+					game.popScene();
 					dialogueIn[keys[i]][1]();
 				});
 			})(i);
@@ -301,5 +396,16 @@ var nothing = function() {};
 function bandName() {
 	var first = ['Liqued', 'Rancid', 'Squishy', 'Brown'];
 	var second = ['Toast', 'Brains', 'Girls', 'Bones'];
-	return first[Math.floor(Math.random()*first.length)] + ' ' + second[Math.floor(Math.random()*second.length)];
+	return randChoice(first) + ' ' + randChoice(second);
 }
+
+function realBands() {
+	var bands = ['Billy Bragg', 'Refused', 'Doc Watson', 'Minor Threat', 'The Coup', 'Crass', 'Wlochaty'];
+	return randChoice(bands);
+}
+
+//return random array element:
+function randChoice(x) {
+	return x[Math.floor(Math.random()*x.length)];
+}
+
