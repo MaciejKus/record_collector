@@ -313,9 +313,23 @@ window.onload = function() {
 ///////////////////////rockerGuy dialogue///////////
 		rockerGuy.gaveRecs = 0;
 		rockerGuy.joinBand = false;
+		rockerGuy.gaveRecs = (function() {
+			var counts = 0;
+			 return function addRec() {
+				counts++;
+				if (counts > 4) { 
+					rockerGuy.dialogue.question = 'Oi. Thanks for all the records. Anything I can do for you?'; 
+					rockerGuy.dialogue.g = ['Do you have any Killed by Death records I can have?', rockerGuy.giveKilled];
+					rockerGuy.dialogue.n = ['I want to join your band!',rockerGuy.canJoin];
+					rockerGuy.dialogue.m = ['Up the punx, oi!',nothing];
+				}
+				
+			}
+			//addRec();
+		})();
 		rockerGuy.dialogue = {
 			question: "Oi! My band is playing a show soon, you should come check us out. <br>I hear you have a bunch of records. Let me have one.",
-			g: ['Uhh, ok. You can have one of my records',function() {records--;rockerGuy.gaveRecs++;}],
+			g: ['Uhh, ok. You can have one of my records',function() {records--;rockerGuy.gaveRecs();}],
 			n: ['What? Get your own records, chump.',nothing],
 			m: ['Maybe I will check out the show.',nothing]
 		};
@@ -396,12 +410,6 @@ window.onload = function() {
 			rockerGuy.x = 420;
 			rockerGuy.y = 40;
 
-			if (rockerGuy.gaveRecs > 4) {
-				rockerGuy.dialogue.question = 'Oi. Thanks for all the records. Anything I can do for you?';
-				rockerGuy.dialogue.g = ['Do you have any Killed by Death records I can have?', rockerGuy.giveKilled];
-				rockerGuy.dialogue.n = ['I want to join your band!',rockerGuy.canJoin];
-				rockerGuy.dialogue.m = ['Up the punx, oi!',nothing];
-			}
 			if (rockerGuy.joinBand && !hero.hasDrums) {
 				storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
 			}
