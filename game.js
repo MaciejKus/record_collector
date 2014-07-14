@@ -356,8 +356,23 @@ window.onload = function() {
 			records += recordInc *e.elapsed;
 			//checks record limits 
 			if (records > recordLimit) {
-				mom.dialogue.question = 'There is no more room in this house for records! You have to <br>find somewhere else to keep them!';
 				records = recordLimit;
+			}
+			this.text = "Records: " +(Math.round(records*100)/100);
+		});
+		//update money label
+		moneyLabel.addEventListener(Event.ENTER_FRAME, function(e) {
+			money += moneyInc * e.elapsed; //e.elapsed accounts for time 
+                                                       //so even if game
+                                                       //is not in main tab
+                                                       //money adds up
+			this.text = 'Money:   ' + (Math.round(money*100)/100);
+		});
+		
+		//checks to seeif dialogue needs to change
+		function checkStats() {
+			if (records > recordLimit) {
+				mom.dialogue.question = 'There is no more room in this house for records! You have to <br>find somewhere else to keep them!';
 			} else {
 				mom.dialogue.question = 'Honey, I dont like this record obsession. Why not try cookie collecting instead?';
 			}
@@ -379,16 +394,7 @@ window.onload = function() {
 					delete labelLady.dialogue.b;
 				}
 			}
-			this.text = "Records: " +(Math.round(records*100)/100);
-		});
-		//update money label
-		moneyLabel.addEventListener(Event.ENTER_FRAME, function(e) {
-			money += moneyInc * e.elapsed; //e.elapsed accounts for time so even if game
-                                                       //is not in main tab
-                                                       //money adds up
-			this.text = 'Money:   ' + (Math.round(money*100)/100);
-		});
-		
+		} //end of checkStats
 
 		//compared x y of hero to x y of last mouse click, if difference is large enough, hero x y moves to mouse click.
 		hero.addEventListener(Event.ENTER_FRAME, function() {
@@ -484,6 +490,7 @@ window.onload = function() {
 			var curNpc = npcArray[i];
 			if(hero.within(curNpc, 15) ) { //CHANGE MAGIC NUMBER 15
 				if (!curNpc.hit) { 
+					checkStats(); //checks and makes needed dialogue updates
 					game.pushScene(game.makeDialogueScene(curNpc.dialogue)); //ADDS DIALGE BOX
 					curNpc.hit = true;
 				}
