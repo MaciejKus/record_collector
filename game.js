@@ -1,3 +1,5 @@
+'use strict';
+
 var DIR_LEFT = 0;
 var DIR_RIGHT = 1;
 var DIR_UP = 2;
@@ -81,15 +83,25 @@ window.onload = function() {
 			}
 		};
 		hero.sellCollection = function() {
-			var endScene = new Scene();
-			var label = new Label('<br> You sell your records<br> You notice how much more to life there is than collecting things<br> You join collectors anonymous<br> You realize today is the first day of the rest of your life<br> You go outside and enjoy life');
-			label.font = '20px monospace';
-			label.color = 'rgb(128,128,128)';
-			label.backgroundColor = "rgb(0,0,0)";
-			label.width = game.width;
-			label.height = game.height;
-			endScene.addChild(label);
-			game.pushScene(endScene);
+			var endText = [ 'You go outside and enjoy life<br>The End','You are happy','You realize today is the first day<br> of the rest of your life','You join collectors anonymous','You notice how much more to life there<br> is than collecting things','You sell your records'];
+			for (var i =0, j = endText.length; i < j; i ++) {
+				var endScene = new Scene();
+				var label = new Label(endText[i]);
+				endScene.backgroundColor = 'black';
+				label.font = '20px monospace';
+				label.textAlign = 'center';
+				label.color = 'rgb(128,128,128)';
+				label.width = game.width-40;
+				label.y = 200;
+				endScene.addChild(label);
+				game.pushScene(endScene);
+				//removes above scenes, one per click
+				if (i!==0) { //skip last scene so it sticks	
+					endScene.addEventListener(Event.TOUCH_START, function() {
+						game.popScene();  //doesnt remove last scene;
+					});	
+				}
+			}
 		};
 		//////npc////////j
 		var mom = new Sprite(64,64);
@@ -108,12 +120,13 @@ window.onload = function() {
 		labelLady.frame = 2;
 		var rockerGuy = new Sprite(64,64);
 		rockerGuy.frame = 2;
+		var storageSpace = new Sprite(64,64);
+		storageSpace.frame = 2;
 		var recordStoreRecords = new Sprite(64,64); //records you can interact with
 		recordStoreRecords.frame = 2;
 		var freeRecord = new Sprite(64,64); //find a free record on the street
 		freeRecord.frame = 2;
-		var npcArray = [mom, recStoreOwner,swapGuy,storageGuy,internetGuy,cuteGirl,labelLady,rockerGuy,recordStoreRecords,freeRecord];
-		//var npcArray = [mom, recStoreOwner,freeRecord,swapGuy];
+		var npcArray = [mom, recStoreOwner,swapGuy,storageGuy,internetGuy,cuteGirl,labelLady,rockerGuy,storageSpace,recordStoreRecords,freeRecord];
 		var npcCount = npcArray.length;
 		for (var i =0; i < npcCount; i++) {
 			npcArray[i].hit = false; //makes sure collision result only happens once per touch
@@ -130,8 +143,8 @@ window.onload = function() {
 					a:['Thanks mom!!',nothing]
 				}));
 			} else {
-				coolBan = ['REM', 'Iron Maiden', 'The Clash', 'Wu Tang', 'Black Sabbath'];
-				lameBan = ['Justin Bieber', 'Winger', 'Stryper', 'ICP'];
+				var coolBan = ['REM', 'Iron Maiden', 'The Clash', 'Wu Tang', 'Black Sabbath'];
+				var lameBan = ['Justin Bieber', 'Winger', 'Stryper', 'ICP'];
 				game.pushScene(game.makeDialogueScene({
 					question:'Sorry honey, maybe you can get a job somewhere?',
 					a:['I bet ' + randChoice(coolBan) + ' never had to get jobs',nothing],
@@ -270,9 +283,6 @@ window.onload = function() {
 		};
 
 ///////////////////////labelLady dialogue//////////////
-		labelLady.sellOut = function() {
-				
-		};
 		labelLady.gotRecord = function() {
 			game.pushScene(game.makeDialogueScene({
 				question : 'I looove Barry White! Thanks a bunch, I will call my boyfriend <br>right now and thank him!',
@@ -287,6 +297,28 @@ window.onload = function() {
 			question: 'Welcome to Corporate Label Inc. We make big money! We dont have time for you right now.',
 			a: ['Only sellouts hang out here anyway',nothing]
 		}
+///////////////////////storageGuy dialogue/////////
+		storageGuy.sellDrums = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: 'Yeah, I can hook you up. A drumkit will cost you ' + 200 + ' high quality prog rock records',
+				y: ['Deal! Prog rock is for burnt out hippies anyway',function() {hero.hasDrums = true; records -= 200}],
+				n: ['Give up my precious records? no way',nothing]
+			}));
+		};
+		storageGuy.dialogue = {
+			question: 'Welcome to Junk in a Truck Storage. Pay me ' + Math.floor(20+ money/100) + ' dollars and you <br>can keep ' + Math.floor(50*recMultiplier) + ' records, here.<br>Sometimes I have stuff for sale from abandoned storage units',
+			y: ['Yeah, I need more room for records. It is a deal',function() {recordLimit += (Math.floor(50*recMultiplier)); money -=Math.floor(20+ money/100);}],
+			n: ['No thanks, I can probably find more space to keep my records in<br>my room at home. I bet mom wont mind.',nothing]
+		};
+///////////////////////rockerGuy dialogue///////////
+		rockerGuy.gaveRecs = 0;
+		rockerGuy.joinBand = false;
+		rockerGuy.dialogue = {
+			question: "Oi! My band is playing a show soon, you should come check us out. <br>I hear you have a bunch of records. Let me have one.",
+			g: ['Uhh, ok. You can have one of my records',function() {records--;rockerGuy.gaveRecs++;}],
+			n: ['What? Get your own records, chump.',nothing],
+			m: ['Maybe I will check out the show.',nothing]
+		};
 
 ///////////////////////freeRecord dialogue///////////
 		freeRecord.dialogue = {
@@ -323,7 +355,9 @@ window.onload = function() {
 			if (money > 10000 || records > 10000) {
 				labelLady.dialogue.question = 'Wow, you sure have done well for yourself. How can Corporate <br>Label Inc. help you?';
 				if (money > 10000) {
-					labelLady.dialogue.a = ['I want to buy this record label and become CEO!', hero.buyLabel];
+					labelLady.dialogue.c = ['I want to buy this record label and become CEO!', hero.buyLabel];
+				} else { 
+					delete labelLady.dialogue.c;
 				}
 				if (records > 10000) {
 					labelLady.dialogue.b = ['I want to sell my whole record collection', hero.sellCollection];
@@ -357,6 +391,20 @@ window.onload = function() {
 			swapGuy.y = 40+floor.y; //make all this into a single loop 
 			labelLady.x = 200+floor.x;
 			labelLady.y = 250+floor.y;
+			storageGuy.x = 400;
+			storageGuy.y = 25;
+			rockerGuy.x = 420;
+			rockerGuy.y = 40;
+
+			if (rockerGuy.gaveRecs > 4) {
+				rockerGuy.dialogue.question = 'Oi. Thanks for all the records. Anything I can do for you?';
+				rockerGuy.dialogue.g = ['Do you have any Killed by Death records I can have?', rockerGuy.giveKilled];
+				rockerGuy.dialogue.n = ['I want to join your band!',rockerGuy.canJoin];
+				rockerGuy.dialogue.m = ['Up the punx, oi!',nothing];
+			}
+			if (rockerGuy.joinBand && !hero.hasDrums) {
+				storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
+			}
 			
 
 			if (hero.y > hero.toY) {
@@ -483,7 +531,7 @@ window.onload = function() {
 		talk[0].width = game.width;
 		talk[0].height = game.height - 400; //400 = game not covered by text
                 scene.addChild(talk[0]);
-		for (i = 1, ii = keys.length; i < ii; i++ ) {
+		for (var i = 1, j = keys.length; i < j; i++ ) {
 			talk[i] = new Label(dialogueIn[keys[i]][0]);
 			talk[i].font = "16px monospace";
 			talk[i].color = "rgb(255,255,0)";
