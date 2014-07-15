@@ -14,9 +14,6 @@ var heroSpeed = 8;
 var offy= 32;
 var offx = 32;
 
-//starting positions
-var momStartX = 90, momStartY = 60;
-
 //used for checking for collisions in terms of y and x for hero
 var hero_x_old= -1;
 var hero_y_old = -1;
@@ -446,22 +443,29 @@ window.onload = function() {
 			//moves NPC the same amount as floor got moved
 			//has to happen before floor values change or 
 			//have to change the NPC to be drawn after the hero
-			mom.x = momStartX+floor.x; 
-	                mom.y = momStartY+floor.y;
-			recStoreOwner.x = 280+floor.x;
-			recStoreOwner.y = 300+floor.y;
-			freeRecord.x = 400+floor.x;
-			freeRecord.y = 410+floor.y;
-			swapGuy.x = 150+floor.x;
-			swapGuy.y = 40+floor.y; //make all this into a single loop 
-			labelLady.x = 200+floor.x;
-			labelLady.y = 250+floor.y;
-			storageGuy.x = 400;
-			storageGuy.y = 25;
-			rockerGuy.x = 420;
-			rockerGuy.y = 40;
-			cuteGirl.x = 370;
-			cuteGirl.y = 45;
+			mom.x = 90+floor.x; 
+	                mom.y = 50+floor.y;
+			recStoreOwner.x = 355+floor.x;
+			recStoreOwner.y = 210+floor.y;
+			recordStoreRecords.x = 505+floor.x;
+			recordStoreRecords.y = 206+floor.y;
+			freeRecord.x = 724+floor.x;
+			freeRecord.y = 640+floor.y;
+			swapGuy.x = 680+floor.x;
+			swapGuy.y = 50+floor.y; //make all this into a single loop 
+			labelLady.x = 530+floor.x;
+			labelLady.y = 750+floor.y;
+			storageGuy.x = 670+floor.x;
+			storageGuy.y = 440+floor.y;
+			rockerGuy.x = 224+floor.x;
+			rockerGuy.y = 610+floor.y;
+			cuteGirl.x = 110+floor.x;
+			cuteGirl.y = 608+floor.y;
+			internetGuy.x = 90+floor.x;
+			internetGuy.y = 330+floor.y;
+			storageSpace.x = 740+floor.x;
+			storageSpace.y = 400+floor.y;
+			
 
 			//if (rockerGuy.joinBand && !hero.hasDrums) {
 	//			storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
@@ -562,6 +566,8 @@ window.onload = function() {
 
 		//listens for mouse click
 		game.rootScene.addEventListener(Event.TOUCH_START,function(e) {
+console.log(e.x);
+console.log(e.y);
 			hero.toX = e.x-offx ;
 			hero.toY = e.y-offy;
 		});
