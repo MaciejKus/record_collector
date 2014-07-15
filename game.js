@@ -52,6 +52,11 @@ window.onload = function() {
 			9,8,10,8, //right
 			1,0,2,0, //up
 			3,11,4,11]; // down
+		hero.playShow = function() {
+			recordGuy.dialogue.question = 'Our last show was so intense! I think our band might be the shape of punk to come.';
+
+		} //play it louder!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AKA do more here
+//MAKE MORE WHEN GIRL IS ROADIE
 		//what hapens when hero buys record store
 		hero.hasRecStore = function() {
 			game.rootScene.removeChild(recStoreOwner);
@@ -148,7 +153,8 @@ window.onload = function() {
 				game.pushScene(game.makeDialogueScene({
 					question:'Sorry honey, maybe you can get a job somewhere?',
 					a:['I bet ' + randChoice(coolBan) + ' never had to get jobs',nothing],
-					b:["Now Way! I'd rather listen to " + randChoice(lameBan) ,nothing]
+					b:["Now Way! I'd rather listen to " + randChoice(lameBan) ,nothing],
+					c: ['All I wanted was to buy a pepsi!',nothing]
 				}));
 			}
 		};
@@ -298,10 +304,16 @@ window.onload = function() {
 			a: ['Only sellouts hang out here anyway',nothing]
 		}
 ///////////////////////storageGuy dialogue/////////
+		storageGuy.soldDrums = function () {
+			records -= 200;
+			delete storageGuy.dialogue.b;
+			rockerGuy.dialogue.question = 'Oi, sweet skins. Welcome to the band.';
+			rockerGuy.dialogue.n = ['Lets play a show! I wanna rock!',hero.playShow];
+		};
 		storageGuy.sellDrums = function() {
 			game.pushScene(game.makeDialogueScene({
 				question: 'Yeah, I can hook you up. A drumkit will cost you 200 high quality <br>prog rock records',
-				y: ['Deal! Prog rock is for burnt out hippies anyway',function() {hero.hasDrums = true; records -= 200}],
+				y: ['Deal! Prog rock is for burnt out hippies anyway',storageGuy.soldDrums],
 				n: ['Give up my precious records? no way',nothing]
 			}));
 		};
@@ -311,14 +323,13 @@ window.onload = function() {
 			n: ['No thanks, I can probably find more space to keep my records in<br>my room at home. I bet mom wont mind.',nothing]
 		};
 ///////////////////////rockerGuy dialogue///////////
-		rockerGuy.joinBand = false;
 		rockerGuy.giveKilled = function() {
 			game.pushScene(game.makeDialogueScene({
 				question : 'Here you go, and remember, punx not dead! oi!',
 				t: ['Thanks. Oi oi.',function() { }] //ADD KILLED REC
 			}));
 			delete rockerGuy.dialogue.g;
-			rockerGuy.dialogue.question = 'We are covering Minor Threat at our next show!';
+			rockerGuy.dialogue.question = 'We are covering Los Crudos at our next show!';
 		};
 		rockerGuy.canJoin = function() {
 			game.pushScene(game.makeDialogueScene({
@@ -330,7 +341,7 @@ window.onload = function() {
 			}));
 			rockerGuy.dialogue.question = 'Any luck with those drums yet?';
 			rockerGuy.dialogue.n = ['Im still looking for the drums', nothing];
-			rockerGuy.joinBand = true;
+			storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
 		};
 		//give a record 5 times and dialouge changes.
 		rockerGuy.gaveRecs = (function() {
@@ -354,6 +365,20 @@ window.onload = function() {
 			m: ['Maybe I will check out the show.',nothing]
 		};
 
+///////////////////////cuteGirl dialogue////////////
+		cuteGirl.denied = function () {
+			game.pushScene(game.makeDialogueScene({
+				question : "Can't you see I'm trying to put this band aid on my finger?",
+				a: ['Oh, excuse me.',nothing],
+				b: ['Was it something I said or something I did? <br>Did my words not come out right?',nothing]
+			}));
+			cuteGirl.dialogue.question = 'I got no time for scrubs. Your records dont impress me.';
+			cuteGirl.dialogue.a = ['Ouch, I guess every rose has its thorn',nothing];
+		};
+		cuteGirl.dialogue = {
+			question : "...",
+			a: ["Hi, how's it going?",cuteGirl.denied]
+		}
 ///////////////////////freeRecord dialogue///////////
 		freeRecord.dialogue = {
 			question: 'Cool, a ' + realBands() + ' record!',
@@ -435,12 +460,14 @@ window.onload = function() {
 			storageGuy.y = 25;
 			rockerGuy.x = 420;
 			rockerGuy.y = 40;
+			cuteGirl.x = 370;
+			cuteGirl.y = 45;
 
-			if (rockerGuy.joinBand && !hero.hasDrums) {
-				storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
-			} else {
-				delete storageGuy.dialogue.b;
-			}
+			//if (rockerGuy.joinBand && !hero.hasDrums) {
+	//			storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
+	//		} else {
+	//			delete storageGuy.dialogue.b;
+	//		}
 			
 
 			if (hero.y > hero.toY) {
