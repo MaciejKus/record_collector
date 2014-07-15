@@ -300,7 +300,7 @@ window.onload = function() {
 ///////////////////////storageGuy dialogue/////////
 		storageGuy.sellDrums = function() {
 			game.pushScene(game.makeDialogueScene({
-				question: 'Yeah, I can hook you up. A drumkit will cost you ' + 200 + ' high quality prog rock records',
+				question: 'Yeah, I can hook you up. A drumkit will cost you 200 high quality <br>prog rock records',
 				y: ['Deal! Prog rock is for burnt out hippies anyway',function() {hero.hasDrums = true; records -= 200}],
 				n: ['Give up my precious records? no way',nothing]
 			}));
@@ -311,8 +311,28 @@ window.onload = function() {
 			n: ['No thanks, I can probably find more space to keep my records in<br>my room at home. I bet mom wont mind.',nothing]
 		};
 ///////////////////////rockerGuy dialogue///////////
-		rockerGuy.gaveRecs = 0;
 		rockerGuy.joinBand = false;
+		rockerGuy.giveKilled = function() {
+			game.pushScene(game.makeDialogueScene({
+				question : 'Here you go, and remember, punx not dead! oi!',
+				t: ['Thanks. Oi oi.',function() { }] //ADD KILLED REC
+			}));
+			delete rockerGuy.dialogue.g;
+			rockerGuy.dialogue.question = 'We are covering Minor Threat at our next show!';
+		};
+		rockerGuy.canJoin = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: 'You know, my band, The '+ bandName() + 's do need a drummer. <br>Can you play?',
+				//scene within scene:
+				n: ['I dont have a drum set. But I bet I can get one from somewhere!',function() {game.pushScene(game.makeDialogueScene({ 
+					question: 'Get a drum set and you can totally rock with us.', a: ['I am so excited I cant control my fingers, I cant controll my <br>brain',nothing] 
+				})); } ]
+			}));
+			rockerGuy.dialogue.question = 'Any luck with those drums yet?';
+			rockerGuy.dialogue.n = ['Im still looking for the drums', nothing];
+			rockerGuy.joinBand = true;
+		};
+		//give a record 5 times and dialouge changes.
 		rockerGuy.gaveRecs = (function() {
 			var counts = 0;
 			 return function addRec() {
@@ -418,6 +438,8 @@ window.onload = function() {
 
 			if (rockerGuy.joinBand && !hero.hasDrums) {
 				storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
+			} else {
+				delete storageGuy.dialogue.b;
 			}
 			
 
