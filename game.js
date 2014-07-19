@@ -1,31 +1,28 @@
 'use strict';
 
-var DIR_LEFT = 0;
-var DIR_RIGHT = 1;
-var DIR_UP = 2;
-var DIR_DOWN = 3;
-
-//where hero starts minus 16
-var heroStartX = 200;
-var heroStartY = 210;
-var heroSpeed = 8;
-
-//how much sprite images are ofset
-var offy= 32;
-var offx = 32;
-
-//used for checking for collisions in terms of y and x for hero
-var hero_x_old= -1;
-var hero_y_old = -1;
-var floor_x_old = -999;
-var floor_y_old = -999;
-
-//other variables:
-var records = 100020, recordInc = 0, money = 122220, moneyInc = 0, recCost = 2, recMultiplier = 1, recordLimit = 5000000; 
-
-
 enchant();
 window.onload = function() {
+	var DIR_LEFT = 0;
+	var DIR_RIGHT = 1;
+	var DIR_UP = 2;
+	var DIR_DOWN = 3;
+
+	//where hero starts minus 16
+	var heroStartX = 200;
+	var heroStartY = 210;
+	var heroSpeed = 8;
+	//how much sprite images are ofset
+	var offy= 32;
+	var offx = 32;
+
+	//used for checking for collisions in terms of y and x for hero
+	var hero_x_old= -1;
+	var hero_y_old = -1;
+	var floor_x_old = -999;
+	var floor_y_old = -999;
+	//other variables:
+	var records = 100020, recordInc = 0, money = 122220, moneyInc = 0, recCost = 2, recMultiplier = 1, recordLimit = 5000000; 
+
 	var game = new Core(640,640);
 	game.fps = 16;
 	game.preload('background.png','spritesheet.png','chara1.png');
@@ -49,10 +46,7 @@ window.onload = function() {
 			9,8,10,8, //right
 			1,0,2,0, //up
 			3,11,4,11]; // down
-		hero.playShow = function() {
-			recordGuy.dialogue.question = 'Our last show was so intense! I think our band might be the shape of punk to come.';
 
-		} //play it louder!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AKA do more here
 //MAKE MORE WHEN GIRL IS ROADIE
 		//what hapens when hero buys record store
 		hero.hasRecStore = function() {
@@ -305,7 +299,7 @@ window.onload = function() {
 			records -= 200;
 			delete storageGuy.dialogue.b;
 			rockerGuy.dialogue.question = 'Oi, sweet skins. Welcome to the band.';
-			rockerGuy.dialogue.n = ['Lets play a show! I wanna rock!',hero.playShow];
+			rockerGuy.dialogue.n = ['Lets play a show! I wanna rock!',rockerGuy.playFirstShow];
 		};
 		storageGuy.sellDrums = function() {
 			game.pushScene(game.makeDialogueScene({
@@ -320,6 +314,31 @@ window.onload = function() {
 			n: ['No thanks, I can probably find more space to keep my records in<br>my room at home. I bet mom wont mind.',nothing]
 		};
 ///////////////////////rockerGuy dialogue///////////
+		rockerGuy.playShow = function () {
+			var seconds = 15;
+			for (var i =0; i < seconds; i++){
+				var workScene = new Scene();
+				var label = new Label('<br>Rocking out, head banging, moshing, thrashing<br><br>circle pit for ' + i + ' more seconds!');
+				label.font = '24px monospace';
+				label.color = 'rgb(255,200,0)';
+				label.backgroundColor = "rgb(0,0,0)";
+				label.width = game.width;
+				label.height = game.height;
+				workScene.addChild(label);
+				game.pushScene(workScene);
+			}
+			//removes above scenes, one per second
+			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt)}; }, 1000);
+			}
+		rockerGuy.playFirstShow = function () {
+			rockerGuy.dialogue.question = 'Our last show was so intense! I think our band might be the <br>shape of punk to come.';
+			cuteGirl.dialogue.question = 'Hey, I really liked your show';
+			cuteGirl.dialogue.a = ['Hey, Thanks! I like your hair',cuteGirl.flirt];
+			cuteGirl.dialogue.b = ['Oh, now that I am in a band you want to talk to me?', cuteGirl.lessflirt];
+			rockerGuy.dialogue.n = ['Lets play a show right now',rockerGuy.playShow];
+			rockerGuy.playShow();
+			
+		}
 		rockerGuy.giveKilled = function() {
 			game.pushScene(game.makeDialogueScene({
 				question : 'Here you go, and remember, punx not dead! oi!',
@@ -333,7 +352,7 @@ window.onload = function() {
 				question: 'You know, my band, The '+ bandName() + 's do need a drummer. <br>Can you play?',
 				//scene within scene:
 				n: ['I dont have a drum set. But I bet I can get one from somewhere!',function() {game.pushScene(game.makeDialogueScene({ 
-					question: 'Get a drum set and you can totally rock with us.', a: ['I am so excited I cant control my fingers, I cant controll my <br>brain',nothing] 
+					question: 'Get a drum set and you can totally rock with us.', a: ["I am so excited I can't control my fingers, I can't controll my <br>brain",nothing] 
 				})); } ]
 			}));
 			rockerGuy.dialogue.question = 'Any luck with those drums yet?';
@@ -363,9 +382,38 @@ window.onload = function() {
 		};
 
 ///////////////////////cuteGirl dialogue////////////
+		cuteGirl.isPrez = function () {
+			game.pushScene(game.makeDialogueScene({
+				question: 'This is so cool! I love your band! I cant wait for the next show',
+				a: ['Thanks for supporting our band', nothing]
+			}));
+			cuteGirl.dialogue.question = 'I love running your merch! You should play more shows. We should <br>also hang out sometime';
+			cuteGirl.dialogue.a = ['That sounds awesome',nothing];
+			cuteGirl.dialogue.b = ['Yeah, that would be cool, but first I want to get a few more <br>records',nothing];
+		};
+		cuteGirl.isNotPrez = function () {
+			cuteGirl.dialogue.question = 'Hey, so maybe I can sell merch for you now?';
+			a: ['Yeah, I think that is a good idea.',cuteGirl.isRaodie];
+			b: ['hmm, yeah, I dont think so.', nothing];
+		}
+		cuteGirl.flirt = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: 'Thanks! Hey does your band need a merch lady? <br>I can help get cash and records for you by selling and trading your merch',
+				a: ['Totally! It would be really cool to have you work with us',cuteGirl.isPrez],
+				b: ['No thanks. We do pretty well already. <br>But you should come check out our next show.',nothing]
+			}));
+		};
+		cuteGirl.lessflirt = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: 'Hey, come on, I always thought you were cute. What if I offered to sell merch for your band? I can help you trade records even outside of shows.',
+				a: ['Yeah, it would be cool to make some extra records. You got a deal',cuteGirl.isPrez],
+				b: ['You were too good to talk to me before, now my band is too good for you. No thanks.',nothing]
+
+			}));
+		};
 		cuteGirl.denied = function () {
 			game.pushScene(game.makeDialogueScene({
-				question : "Can't you see I'm trying to put this band aid on my finger?",
+				question : "Leave me alone. Can't you see I'm trying to put this band aid on my finger?",
 				a: ['Oh, excuse me.',nothing],
 				b: ['Was it something I said or something I did? <br>Did my words not come out right?',nothing]
 			}));
@@ -376,6 +424,73 @@ window.onload = function() {
 			question : "...",
 			a: ["Hi, how's it going?",cuteGirl.denied]
 		}
+///////////////////////internetGuy /////////////
+		internetGuy.flip = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: ['Neat, you will now get more records per second. Let me know if you want me to flip more',nothing],
+				a: ['Thanks. I would hate to try to do it myself',nothing]
+			}));
+			records++;
+			}; /////////ADD MORE RECORDS 
+		internetGuy.questDone = function() {
+			game.pushScene(game.makeDialogueScene({
+				question: "Hah! I bet. Do you like Math rock? I can flip records for you on the internet. Give me some to start with and I will multiply them",
+				a: ['Yeah, that sounds good. Flip me some records, dude',internetGuy.flip],
+				b: ['Maybe some other time. I dont really trust computers',nothing]
+			}));
+			internetGuy.dialogue.question = 'Hey d00d, want me to flip some records for you on the net?';
+			internetGuy.dialogue.a = ['Yeah, I want to get more records',itnernetGuy.flip];
+			itnernetGuy.dialogue.b = ['Not right now.', nothing];
+		};
+		internetGuy.killed = (function() {
+			var count =0;
+			return function addRed() {
+				count++;
+				if (count > 3) {
+					internetGuy.dialogue.question = 'Sweet, you found all the Killed by Death records I wanted';
+					internetGuy.dialogue.a = ['It was easy.',internetGuy.questDone];
+				}
+			}
+		})();
+		internetGuy.dialogue = {
+			question: 'I trade records on the Internet. Only rare ones. I might be willing to work for you if you can find me 5 Killed by Death records.',
+			a: ['I bet I can find them all',function() {internetGuy.dialogue.question = 'You still have not found all the Killed by Death records, huh?'; delete internetGuy.dialogue.b;}],
+			b:['Nerd, find your own records!',nothing]			
+		}
+///////////////////////recordStoreReords///////
+		recordStoreRecords.stole = function () {
+			if (Math.floor(Math.random()*4) <1 ) { //change the 4 to variable. if caught, variable goes up
+				game.pushScene(game.makeDialogueScene({
+					question:"Son, you ain't no Pretty Boy Floyd. You just got caught stealing",
+					a: ['Instead of going to jail I am willing to pay<br>Here, take some records!', function () { }] //minus recs, make rec store stuff mor expensive, change recrd owner dialogue 
+				}));
+			} else {
+				game.pushScene(game.makeDialogueScene({
+					question: 'Shoplifters of the world unite, you just got away with some <br>free records',
+					a: ['I fought the law, and I won!',function() { } ]
+				 }));
+			}
+		} //end stole
+		recordStoreRecords.dialogue = {
+			question: 'Look at all these records!',
+			a: ['I bet I could take one without anyone noticing. I will <br>take some!',recordStoreRecords.stole],
+			b: ['One day these will all be mine. If I want any right now I need to buy them from the owner',nothing]
+		};
+///////////////////////storageSpace///////////////
+		storageSpace.clean = function() {
+			var scene = new Scene();
+			var label = new Label('Select a storage space to clean');
+			label.font = '20px monospace';
+			label.textAlign = 'center';
+			label.color = 'rgb(0,255,0)';
+			
+			///////add sprite for storage doors
+		}
+		storageSpace.dialogue = {
+			question : 'Do you want to help clean out storage units? We will pay you.',
+			y: ['Sure, I can use the money, and might find something cool in there',storageSpace.clean],
+			n: ['No thanks, I dont do manual labor.',nothing]
+		};
 ///////////////////////freeRecord dialogue///////////
 		freeRecord.dialogue = {
 			question: 'Cool, a ' + realBands() + ' record!',
@@ -566,8 +681,6 @@ window.onload = function() {
 
 		//listens for mouse click
 		game.rootScene.addEventListener(Event.TOUCH_START,function(e) {
-console.log(e.x);
-console.log(e.y);
 			hero.toX = e.x-offx ;
 			hero.toY = e.y-offy;
 		});
