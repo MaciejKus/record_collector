@@ -56,6 +56,9 @@ window.onload = function() {
 			money -= 100;
 			recordInc += 0.0008;
 			recordLimit += 1000;
+			security.dialogue.question = 'How are you today boss? Anything I can help you with, boss?';
+			security.dialogue.a =  ['Youre fine where you are. Nice day we are having.',nothing];
+			security.dialgoue.b = ['Who is the dumb one now? You are fired! get out of here, rent-a-cop',function() {game.rootScene.removeChild(security);	var index = npcArray.indexOf('security'); npcArray.splice(index, 1); }];
 		};
 		hero.buyLabel = function() {
 			var endText = [ 'After all that work you are left with about $3.50<br> and a single Creed record.<br>The End','You spend all your money on hookers and blow','You get laid off','Your board of directors decides <br>they have had enough','You party with rock stars','You make tons of money doing next to nothing','You become CEO of Corporate Label Inc'];
@@ -101,28 +104,30 @@ window.onload = function() {
 		};
 		//////npc////////j
 		var mom = new Sprite(64,64);
-		mom.frame = 3;
+		mom.frame = 20;
 		var recStoreOwner = new Sprite(64,64);
-		recStoreOwner.frame = 2;
+		recStoreOwner.frame = 21;
 		var swapGuy = new Sprite(64,64);
-		swapGuy.frame = 2;
+		swapGuy.frame = 14;
 		var storageGuy = new Sprite(64,64);
-		storageGuy.frame = 2;
+		storageGuy.frame = 17;
 		var internetGuy = new Sprite(64,64);
-		internetGuy.frame = 2;
+		internetGuy.frame = 18;
 		var cuteGirl = new Sprite(64,64);
-		cuteGirl.frame = 2;
+		cuteGirl.frame = 16;
 		var labelLady = new Sprite(64,64);
-		labelLady.frame = 2;
+		labelLady.frame = 19;
 		var rockerGuy = new Sprite(64,64);
-		rockerGuy.frame = 2;
+		rockerGuy.frame = 23;
 		var storageSpace = new Sprite(64,64);
-		storageSpace.frame = 2;
+		storageSpace.frame = 12;
+		var security = new Sprite(64,64);
+		security.frame = 24;
 		var recordStoreRecords = new Sprite(64,64); //records you can interact with
-		recordStoreRecords.frame = 2;
+		recordStoreRecords.frame = 22;
 		var freeRecord = new Sprite(64,64); //find a free record on the street
-		freeRecord.frame = 2;
-		var npcArray = [mom, recStoreOwner,swapGuy,storageGuy,internetGuy,cuteGirl,labelLady,rockerGuy,storageSpace,recordStoreRecords,freeRecord];
+		freeRecord.frame = 15;
+		var npcArray = [mom, recStoreOwner,swapGuy,storageGuy,internetGuy,cuteGirl,labelLady,security,rockerGuy,storageSpace,recordStoreRecords,freeRecord];
 		var npcCount = npcArray.length;
 		for (var i =0; i < npcCount; i++) {
 			npcArray[i].hit = false; //makes sure collision result only happens once per touch
@@ -453,17 +458,24 @@ window.onload = function() {
 			}
 		})();
 		internetGuy.dialogue = {
-			question: 'I trade records on the Internet. Only rare ones. I might be willing to work for you if you can find me 5 Killed by Death records.',
+			question: 'I trade records on the Internet. Only rare ones. I might be<br>willing to work for you if you can find me 5 Killed by<br>Death records.',
 			a: ['I bet I can find them all',function() {internetGuy.dialogue.question = 'You still have not found all the Killed by Death records, huh?'; delete internetGuy.dialogue.b;}],
 			b:['Nerd, find your own records!',nothing]			
 		}
+////////////////////////security dialoge
+		security.dialogue = {
+			question: 'Best not be trying to steal anything, you dumb kid.',
+			a: ['I would not dream of it',nothing]
+		}
 ///////////////////////recordStoreReords///////
 		recordStoreRecords.stole = function () {
-			if (Math.floor(Math.random()*4) <1 ) { //change the 4 to variable. if caught, variable goes up
+			if (Math.floor(Math.random()*3) <1 ) { //change the 4 to variable. if caught, variable goes up
 				game.pushScene(game.makeDialogueScene({
 					question:"Son, you ain't no Pretty Boy Floyd. You just got caught stealing",
 					a: ['Instead of going to jail I am willing to pay<br>Here, take some records!', function () { }] //minus recs, make rec store stuff mor expensive, change recrd owner dialogue 
 				}));
+				security.dialogue.question = 'Seems like shoplifters have to pay more for records around here<br>Stupid kid, dont try to steal anything else!';
+				security.dialogue.a = ['I was framed!',nothing];
 			} else {
 				game.pushScene(game.makeDialogueScene({
 					question: 'Shoplifters of the world unite, you just got away with some <br>free records',
@@ -533,7 +545,7 @@ window.onload = function() {
 			} else {
 				mom.dialogue.question = 'Honey, I dont like this record obsession. Why not try cookie collecting instead?';
 			}
-			if (money > 1) {
+			if (money > 500) {
 				recStoreOwner.dialogue.j = ['I want to buy your shop!',recStoreOwner.buyShop];
 			} else {
 				recStoreOwner.dialogue.j = ['Can I do some work around here?',recStoreOwner.job];
@@ -553,7 +565,6 @@ window.onload = function() {
 			}
 		} //end of checkStats
 
-		//compared x y of hero to x y of last mouse click, if difference is large enough, hero x y moves to mouse click.
 		hero.addEventListener(Event.ENTER_FRAME, function() {
 			//moves NPC the same amount as floor got moved
 			//has to happen before floor values change or 
@@ -567,7 +578,7 @@ window.onload = function() {
 			freeRecord.x = 724+floor.x;
 			freeRecord.y = 640+floor.y;
 			swapGuy.x = 680+floor.x;
-			swapGuy.y = 50+floor.y; //make all this into a single loop 
+			swapGuy.y = 50+floor.y; 
 			labelLady.x = 530+floor.x;
 			labelLady.y = 750+floor.y;
 			storageGuy.x = 670+floor.x;
@@ -580,15 +591,9 @@ window.onload = function() {
 			internetGuy.y = 330+floor.y;
 			storageSpace.x = 740+floor.x;
 			storageSpace.y = 400+floor.y;
+			security.x = 450+floor.x;
+			security.y = 280+floor.y;
 			
-
-			//if (rockerGuy.joinBand && !hero.hasDrums) {
-	//			storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
-	//		} else {
-	//			delete storageGuy.dialogue.b;
-	//		}
-			
-
 			if (hero.y > hero.toY) {
 				hero.dir = DIR_UP;
 				//if mouse click and hero are close enough together, just move hero to where mouseclick happened:
@@ -652,17 +657,15 @@ window.onload = function() {
 					if (floor.hitTest(hero.x + (offx+16)+Math.abs(floor.x), hero.y+offy*2+Math.abs(floor.y))) hero.x -=heroSpeed;
 				}
 			}
-///////////////////insert collison stuff here ///////////****************
 		var npcLength = npcArray.length;
 		for (var i = 0; i < npcLength; i++ ) {
 			var curNpc = npcArray[i];
-			if(hero.within(curNpc, 15) ) { //CHANGE MAGIC NUMBER 15
+			if(hero.within(curNpc, 16) ) { //15 is radius of collision
 				if (!curNpc.hit) { 
 					checkStats(); //checks and makes needed dialogue updates
-					game.pushScene(game.makeDialogueScene(curNpc.dialogue)); //ADDS DIALGE BOX
+					game.pushScene(game.makeDialogueScene(curNpc.dialogue)); //adds dialogue box
 					curNpc.hit = true;
 				}
-				// CREATE VARIABLE COLISION = TRUE
 			} else {
 				curNpc.hit = false;
 			}
@@ -724,7 +727,6 @@ window.onload = function() {
 			scene.addChild(talk[i]);
 		}
 		for (var i = 1; i < keys.length; i++ ) {
-//console.log(keys[i][0]);
 			(function(i){ //dealing with a closure
 				talk[i].addEventListener(Event.TOUCH_START, function() {
 					game.popScene();
@@ -735,25 +737,26 @@ window.onload = function() {
 		return scene;
 	}; //end of makeDialogueScene
 
+//////////functions:
+	var nothing = function() {};
+
+	//creates random band name
+	function bandName() {
+		var first = ['Liqued', 'Rancid', 'Squishy', 'Brown', 'Swampy', 'Edgy', 'Monotone'];
+		var second = ['Toast', 'Brains', 'Bones', 'Animals','Worms','Graphics'];
+		return randChoice(first) + ' ' + randChoice(second);
+	}
+
+	function realBands() {
+		var bands = ['Billy Bragg', 'Refused', 'Doc Watson', 'Minor Threat', 'The Coup', 'Crass', 'Wlochaty'];
+		return randChoice(bands);
+	}
+
+	//return random array element:
+	function randChoice(x) {
+		return x[Math.floor(Math.random()*x.length)];
+	}
+
 	game.start();
 };
-
-var nothing = function() {};
-
-//creates random band name
-function bandName() {
-	var first = ['Liqued', 'Rancid', 'Squishy', 'Brown'];
-	var second = ['Toast', 'Brains', 'Girls', 'Bones'];
-	return randChoice(first) + ' ' + randChoice(second);
-}
-
-function realBands() {
-	var bands = ['Billy Bragg', 'Refused', 'Doc Watson', 'Minor Threat', 'The Coup', 'Crass', 'Wlochaty'];
-	return randChoice(bands);
-}
-
-//return random array element:
-function randChoice(x) {
-	return x[Math.floor(Math.random()*x.length)];
-}
 
