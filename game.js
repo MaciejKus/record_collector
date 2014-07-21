@@ -489,15 +489,49 @@ window.onload = function() {
 			b: ['One day these will all be mine. If I want any right now I need to buy them from the owner',nothing]
 		};
 ///////////////////////storageSpace///////////////
+		storageSpace.choseDoor = function() {
+			var gainedRecs = 10; //ADD MOAR
+console.log(Math.random()*3);
+console.log(Math.random()*3);
+console.log(Math.random()*3);
+			if (Math.random()*3 <  1) {
+				var qu = 'Awesome, the space you chose to clean had a bunch of records! you<br>just gained ' + gainedRecs + ' records!';
+				records += gainedRecs;
+			}  else {
+				var qu = 'Shoot, you did not find anything other than lint and <br>hairballs in the storage space. At least you still go paid';
+			}
+			game.pushScene(game.makeDialogueScene({
+				question: qu,
+				a: ["That's what it's like workin for the Man every night and day",nothing]
+			}));
+			money += 20;
+		};
 		storageSpace.clean = function() {
 			var scene = new Scene();
+			scene.backgroundColor = 'black';
 			var label = new Label('Select a storage space to clean');
 			label.font = '20px monospace';
 			label.textAlign = 'center';
 			label.color = 'rgb(0,255,0)';
-			
-			///////add sprite for storage doors
-		}
+			scene.addChild(label);
+			var door = [];
+			var doorX = 116;
+			for (i =0; i < 3; i++ ) {
+				door[i] = new Sprite(64,64);
+				door[i].scale(2,2);
+				door[i].image = game.assets['spritesheet.png'];
+				door[i].frame = 13;
+				door[i].x = doorX;
+				doorX += 140;
+				door[i].y = 320;
+				scene.addChild(door[i]);
+				door[i].addEventListener(Event.TOUCH_START, function() {
+					game.popScene();
+					storageSpace.choseDoor();
+				});	
+			}
+			game.pushScene(scene);
+		};
 		storageSpace.dialogue = {
 			question : 'Do you want to help clean out storage units? We will pay you.',
 			y: ['Sure, I can use the money, and might find something cool in there',storageSpace.clean],
