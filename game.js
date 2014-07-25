@@ -1,7 +1,6 @@
-'use strict';
-
 enchant();
 window.onload = function() {
+	'use strict';
 	var DIR_LEFT = 0;
 	var DIR_RIGHT = 1;
 	var DIR_UP = 2;
@@ -46,19 +45,21 @@ window.onload = function() {
 			9,8,10,8, //right
 			1,0,2,0, //up
 			3,11,4,11]; // down
-
-//MAKE MORE WHEN GIRL IS ROADIE
 		//what hapens when hero buys record store
 		hero.hasRecStore = function() {
 			game.rootScene.removeChild(recStoreOwner);
-			var index = npcArray.indexOf('recStoreOwner');
+			var index = npcArray.indexOf(recStoreOwner);
 			npcArray.splice(index, 1);
-			money -= 300;
+			money -= 400;
 			recordInc += 0.0009;
+			records += 200;
 			recordLimit += 1000;
 			security.dialogue.question = 'How are you today boss? Anything I can help you with, boss?';
 			security.dialogue.a =  ['Youre fine where you are. Nice day we are having.',nothing];
-			security.dialgoue.b = ['Who is the dumb one now? You are fired! get out of here, rent-a-cop',function() {game.rootScene.removeChild(security);	var index = npcArray.indexOf('security'); npcArray.splice(index, 1); }];
+			security.dialogue.b = ['Who is the dumb one now? You are fired! get out of here, rent-a-cop',function() {game.rootScene.removeChild(security);	var index = npcArray.indexOf(security); npcArray.splice(index, 1); }];
+			recordStoreRecords.dialogue.question = 'So many records';
+			recordStoreRecords.dialogue.a = ['Mine. All Mine',nothing];
+			delete recordStoreRecords.dialogue.b;
 		};
 		hero.buyLabel = function() {
 			var endText = [ 'After all that work you are left with about $3.50<br> and a single Creed record.<br>The End','You spend all your money on hookers and blow','You get laid off','Your board of directors decides <br>they have had enough','You party with rock stars','You make tons of money doing next to nothing','You become CEO of Corporate Label Inc'];
@@ -190,9 +191,9 @@ window.onload = function() {
 				var buyQuestion;
 				recStoreOwner.recMultiplier = Math.floor(records/5) || 1;
 				if (records < 100) {
-					buyQuestion = 'We got a great sale going on right now. Only ' + recStoreOwner.shopliftCost*recStoreOwner.recCost + ' dollars per <br>record!';
+					buyQuestion = 'We got a great sale going on right now. Only ' + (Math.floor(100*recStoreOwner.shopliftCost*recStoreOwner.recCost))/100 + ' dollars per <br>record!';
 				} else {
-					buyQeustion = 'Good records are hard to find. We are selling them for ' +recStoreOwner.shopliftCost*recStoreOwner.recCost + ' dollars per record';
+					buyQuestion = 'Good records are hard to find. We are selling them for ' +(Math.floor(recStoreOwner.shopliftCost*recStoreOwner.recCost))/100 + ' dollars per record';
 				}
 				game.pushScene(game.makeDialogueScene({
 					question: buyQuestion,
@@ -211,9 +212,9 @@ window.onload = function() {
                                  }));
                         } else  {
 				game.pushScene(game.makeDialogueScene({
-                                        question: 'Ok, lets look at your posuer collection... hmm..<br>I will give you ' + Math.floor(recStoreOwner.recCost/(2*recStoreOwner.shopliftCost)) + ' dollars per record.',
-                                        a: ['Neat I will sell ' + recStoreOwner.recMultiplier + ' ' + bandName() + ' records!', function() { money += recStoreOwner.recMultiplier * recStoreOwner.recCost/(recStoreOwner.shopliftCost*2); records-= recStoreOwner.recMultiplier; recStoreOwner.recCost -= 0.2;}],
-                                        b: ['OK I will sell ' + (recStoreOwner.recMultiplier*2) + ' ' + bandName() + ' records!', function() { money += recStoreOwner.recMultiplier * recStoreOwner.recCost*recStoreOwner.shopliftCost; records-= 2*recStoreOwner.recMultiplier; recStoreOwner.recCost -= 0.2;}],
+                                        question: 'Ok, lets look at your posuer collection... hmm..<br>I will give you ' + (Math.floor(100*recStoreOwner.recCost/(2*recStoreOwner.shopliftCost)) +1)/100  + ' dollars per record.',
+                                        a: ['Neat I will sell ' + recStoreOwner.recMultiplier + ' ' + bandName() + ' records!', function() { money += recStoreOwner.recMultiplier * (1 +recStoreOwner.recCost)/(recStoreOwner.shopliftCost*2); records-= recStoreOwner.recMultiplier; recStoreOwner.recCost -= 0.2;}],
+                                        b: ['OK I will sell ' + (recStoreOwner.recMultiplier*2) + ' ' + bandName() + ' records!', function() { money += recStoreOwner.recMultiplier * (1+recStoreOwner.recCost)*recStoreOwner.shopliftCost; records-= 2*recStoreOwner.recMultiplier; recStoreOwner.recCost -= 0.2;}],
                                         c: ['I need better prices than those. Maybe another time.', nothing]
                                 }));
 			}
@@ -233,22 +234,22 @@ window.onload = function() {
 				game.pushScene(workScene);
 			}
 			//removes above scenes, one per second
-			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt)}; }, 1000);
+			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt);} }, 1000);
 		}; //end work
 		recStoreOwner.job = function() {
 			recStoreOwner.recMultiplier = Math.floor(records/5) || 1;
 			game.pushScene(game.makeDialogueScene({
-				question: 'I will pay you ' + (Math.floor(500*recStoreOwner.recMultiplier))/100 + '  records or ' +  (Math.floor(500*recStoreOwner.recCost))/100  + ' dollars to work right now',
-				r: ['I will work for records', function() {recStoreOwner.work(); records+=5*recStoreOwner.recMultiplier;}],
+				question: 'I will pay you ' + (Math.floor(400*recStoreOwner.recMultiplier))/100 + '  records or ' +  (Math.floor(500*recStoreOwner.recCost))/100  + ' dollars to work right now',
+				r: ['I will work for records', function() {recStoreOwner.work(); records+=4*recStoreOwner.recMultiplier;}],
 				m: ['I will work for money', function() {recStoreOwner.work(); money+=5*recStoreOwner.recCost;}],
 				n: ['I dont want to be a wage slave', nothing]
 			}));
 		};
 		recStoreOwner.buyShop = function() {
 			game.pushScene(game.makeDialogueScene({
-				question: 'You punk kid! You got more records than I do. This store does not make any money, but a lot of people trade in their old records. Fine, I will sell for 300 dollars.',
+				question: 'You punk kid! You got more records than I do. This store does not<br>make any money, but a lot of people trade in their old records.<br>Fine, I will sell for 300 dollars.',
 				y: ['Sucker, you got a deal', hero.hasRecStore],
-				n: ['JK, LOL, not interesed', nothing]
+				n: ['JK, LOL, not interested', nothing]
 			}));
 		};
 		recStoreOwner.dialogue = {
@@ -283,10 +284,9 @@ window.onload = function() {
 			swapGuy.dialogue.question = 'What is up brah?';
 			swapGuy.dialogue.y = ['I got some records I want to swap',swapGuy.swap];
 			swapGuy.dialogue.n = ['Just wanted to tell you my new favorite band is ' + bandName(), nothing];
-//////////ADD +! FOR GETTING KILLED BY DEATH HERE
 		};
 		swapGuy.dialogue = {
-			question: 'Hey, I run a booth at the swapmeet here. Can you deliver this <br>Barry White record to my girlfriend at the record label for me?',
+			question: 'Hey, I run a booth at the swap meet here. Can you deliver this <br>Barry White record to my girlfriend at the record label for me?',
 			y: ['Sure, I can do that for you', swapGuy.tookRecord ],
 			n: ['I dont have the time', nothing]
 		};
@@ -301,11 +301,11 @@ window.onload = function() {
 			labelLady.dialogue.a = ['AKA wimps and posers!',nothing];
 			swapGuy.dialogue.question = 'Hey kid, what can I do you for?';
 			swapGuy.dialogue.y = ['Your girlfriend loved the record you sent her', swapGuy.tip];
-		}
+		};
 		labelLady.dialogue = {
 			question: 'Welcome to Corporate Label Inc. We make big money! We dont have<br>time for you right now.',
 			a: ['Only sellouts hang out here anyway',nothing]
-		}
+		};
 ///////////////////////storageGuy dialogue/////////
 		storageGuy.cost = 1;
 		storageGuy.soldDrums = function () {
@@ -320,7 +320,7 @@ window.onload = function() {
 		};
 		storageGuy.sellDrums = function() {
 			game.pushScene(game.makeDialogueScene({
-				question: 'Yeah, I can hook you up. A drumkit will cost you 80 high quality <br>prog rock records',
+				question: 'Yeah, I can hook you up. A drum kit will cost you 80 high quality <br>prog rock records',
 				y: ['Deal! Prog rock is for burnt out hippies anyway',storageGuy.soldDrums],
 				n: ['Give up my precious records? no way',nothing]
 			}));
@@ -343,7 +343,7 @@ window.onload = function() {
 			var seconds = 15;
 			for (var i =0; i < seconds; i++){
 				var workScene = new Scene();
-				var label = new Label('<br>Playing shows lets you get paid. It also<br>increases your fame, increasing the <br>merch money');
+				var label = new Label('<br>you make money playing shows. Shows also<br>increase your fame, increasing your<br>merch income. Please wait while we circle pit');
 				label.font = '24px monospace';
 				label.color = 'rgb(255,200,0)';
 				label.backgroundColor = "rgb(0,0,0)";
@@ -353,10 +353,9 @@ window.onload = function() {
 				game.pushScene(workScene); //ADD ROCKING IMAGE
 			}
 			//removes above scenes, one per second
-			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt)}; }, 1000);
+			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt);} }, 1000);
 			money += 2*rockerGuy.showsPlays;
 			rockerGuy.showsPlays++;
-			
 		};
 		rockerGuy.playFirstShow = function () {
 			rockerGuy.dialogue.question = 'Our last show was so intense! I think our band might be the <br>shape of punk to come. We even made ' + (2*rockerGuy.showsPlays) + ' dollars';
@@ -365,12 +364,12 @@ window.onload = function() {
 			cuteGirl.dialogue.b = ['Oh, now that I am in a band you want to talk to me?', cuteGirl.lessflirt];
 			rockerGuy.dialogue.n = ['Lets play a show right now',rockerGuy.playShow];
 			rockerGuy.playShow();
-			cuteGirl.isMoney && (moneyInc += 0.002);
-		}
+			cuteGirl.isMoney && (moneyInc += 0.0005);
+		};
 		rockerGuy.giveKilled = function() {
 			game.pushScene(game.makeDialogueScene({
 				question : 'Here you go, and remember, punx not dead! oi!',
-				t: ['Thanks. Oi oi.',internetGuy.killed] //ADD KILLED REC
+				t: ['Thanks. Oi oi.',internetGuy.killed] 
 			}));
 			delete rockerGuy.dialogue.g;
 			rockerGuy.dialogue.question = 'We are covering Los Crudos at our next show!';
@@ -385,7 +384,7 @@ window.onload = function() {
 			}));
 			rockerGuy.dialogue.question = 'Any luck with those drums yet?';
 			rockerGuy.dialogue.n = ['Im still looking for the drums', nothing];
-			storageGuy.dialogue.b = ['Hey, Do you have a drumset I can buy?',storageGuy.sellDrums];
+			storageGuy.dialogue.b = ['Hey, Do you have a drum set I can buy?',storageGuy.sellDrums];
 		};
 		//give a record 5 times and dialouge changes.
 		rockerGuy.gaveRecs = (function() {
@@ -398,9 +397,7 @@ window.onload = function() {
 					rockerGuy.dialogue.n = ['I want to join your band!',rockerGuy.canJoin];
 					rockerGuy.dialogue.m = ['Up the punx, oi!',nothing];
 				}
-				
-			}
-			//addRec();
+			};
 		})();
 		rockerGuy.dialogue = {
 			question: "Oi! My band is playing a show soon, you should come check us out. <br>I hear you have a bunch of records. Let me have one.",
@@ -415,28 +412,28 @@ window.onload = function() {
 				a: ['Thanks for supporting our band. You are really helping us bring in more money', nothing]
 			}));
 			cuteGirl.dialogue.question = 'I love running your merch! You should play more shows. We should <br>also hang out sometime';
-			cuteGirl.dialogue.a = ['That sounds awesome',nothing];
+			delete cuteGirl.dialogue.a;
 			cuteGirl.dialogue.b = ['Yeah, that would be cool, but first I want to get a few more <br>records',nothing];
-			moneyInc += 0.002
+			moneyInc += 0.002;
 			cuteGirl.isMoney = true;
 		};
 		cuteGirl.isNotPrez = function () {
 			cuteGirl.dialogue.question = 'Hey, so maybe I can sell merch for you now?';
-			a: ['Yeah, I think that is a good idea.',cuteGirl.isPrez];
-			b: ['hmm, yeah, I dont think so.', nothing];
-		}
+			cuteGirl.dialogue.a =['Yeah, I think that is a good idea.',cuteGirl.isPrez];
+			cuteGirl.dialogue.bb = ['hmm, yeah, I dont think so.', nothing];
+		};
 		cuteGirl.flirt = function() {
 			game.pushScene(game.makeDialogueScene({
 				question: 'Thanks! Hey does your band need a merch lady? <br>I can help get cash and records for you by selling and<br>trading your merch',
 				a: ['Totally! It would be really cool to have you work with us',cuteGirl.isPrez],
-				b: ['No thanks. We do pretty well already. <br>But you should come check out our next show.',nothing]
+				b: ['No thanks. We do pretty well already. <br>But you should come check out our next show.',cuteGirl.idNotPrez]
 			}));
 		};
 		cuteGirl.lessflirt = function() {
 			game.pushScene(game.makeDialogueScene({
 				question: 'Hey, come on, I always thought you were cute. What if I offered to sell merch for your band? I can help you trade records even outside of shows.',
 				a: ['Yeah, it would be cool to make some extra records. You got a deal',cuteGirl.isPrez],
-				b: ['You were too good to talk to me before, now my band is too good for you. No thanks.',nothing]
+				b: ['You were too good to talk to me before, now my band is too good for you. No thanks.',cuteGirl.isNotPrez]
 
 			}));
 		};
@@ -452,15 +449,16 @@ window.onload = function() {
 		cuteGirl.dialogue = {
 			question : "...",
 			a: ["Hi, how's it going?",cuteGirl.denied]
-		}
+		};
 ///////////////////////internetGuy /////////////
 		internetGuy.flipCost = 2;
 		internetGuy.flip = function() {
 			game.pushScene(game.makeDialogueScene({
-				question: 'Neat, give me ' + internetGuy.flipCost*60 + ' records and I will start flipping them',
-				y: ['Yeah, I think of this as an investment, here you go', function() { if (records>= internetGuy.flipCost*60) {records -= internetGuy.flipCost*60; recordInc += .0005;} else { cantAfford();} }],
+				question: 'Neat, give me ' + internetGuy.flipCost*60 + ' records and I will flip them',
+				y: ['Yeah, I think of this as an investment, here you go', function() { if (records>= internetGuy.flipCost*60) {records -= internetGuy.flipCost*60; recordInc += 0.0005;} else { cantAfford();} }],
 				a: ['No thanks, the internet is for porn not flipping records',nothing]
 			}));
+		internetGuy.flipCost += 1;
 		};
 		internetGuy.questDone = function() {
 			game.pushScene(game.makeDialogueScene({
@@ -480,24 +478,24 @@ window.onload = function() {
 					internetGuy.dialogue.question = 'Sweet, you found all the Killed by Death records I wanted';
 					internetGuy.dialogue.a = ['It was easy.',internetGuy.questDone];
 				}
-			}
+			};
 		})();
 		internetGuy.dialogue = {
 			question: 'I trade records on the Internet. Only rare ones. I might be<br>willing to work for you if you can find me 3 Killed by<br>Death records.',
 			a: ['I bet I can find them all',function() {internetGuy.dialogue.question = 'You still have not found all the Killed by Death records, huh?'; delete internetGuy.dialogue.b;}],
 			b:['Nerd, find your own records!',nothing]			
-		}
+		};
 ////////////////////////security dialoge
 		security.dialogue = {
 			question: 'Best not be trying to steal anything, you dumb kid.',
 			a: ['I would not dream of it',nothing]
-		}
+		};
 ///////////////////////recordStoreReords///////
 		recordStoreRecords.killed = true;
 		recordStoreRecords.stole = function () {
 			if ((Math.random()*3.5) <recStoreOwner.shopliftCost ) { //the more you get caught the more likely you will be to get caught again
 				recStoreOwner.shopliftCost += 0.3;
-				if (recStoreOwner.shopliftCost >3.2) { recStoreOwner.shopliftCost ===3;}
+				if (recStoreOwner.shopliftCost >3.2) { recStoreOwner.shopliftCost =3;}
 				game.pushScene(game.makeDialogueScene({
 					question:"Son, you ain't no Pretty Boy Floyd. You just got caught stealing.<br>We are taking a fifth of your recrods away",
 					a: ['Instead of going to jail I am willing to pay<br>Here, take my records!', function () { records -= records/5; }] 
@@ -505,17 +503,18 @@ window.onload = function() {
 				security.dialogue.question = 'Seems like shoplifters have to pay more for records around here<br>Stupid kid, dont try to steal anything else!';
 				security.dialogue.a = ['I was framed!',nothing];
 			} else {
+				var q = '';
 				if (recordStoreRecords.killed) {
-					var q = ' And a Killed by Death record!';
+					q = ' And a Killed by Death record!';
 					internetGuy.killed();
 					recordStoreRecords.killed = false;
 				}
 				game.pushScene(game.makeDialogueScene({
-					question: 'Shoplifters of the world unite, you just got away with 15 <br>free records' + (q || ''),
+					question: 'Shoplifters of the world unite, you just got away with 15 <br>free records' + q,
 					a: ['I fought the law, and I won!',function() {records += 15; } ]
 				 }));
 			}
-		} //end stole
+		}; //end stole
 		recordStoreRecords.dialogue = {
 			question: 'Look at all these records!',
 			a: ['I bet I could take a few without anyone noticing. <br>I will take some!',recordStoreRecords.stole],
@@ -523,17 +522,18 @@ window.onload = function() {
 		};
 ///////////////////////storageSpace///////////////
 		storageSpace.choseDoor = function() {
-			var gainedRecs = 10; 
+			var ann,qu,gainedRecs = 10; 
 			if (Math.random()*3 <  1) {
-				var qu = 'Awesome, the space you chose to clean had a bunch of records! you<br>just gained ' + gainedRecs + ' records!';
-				var ann = 'All due to a positive mental attitude';
+				qu = 'Awesome, the space you chose to clean had a bunch of records! you<br>just gained ' + gainedRecs + ' records!';
+				ann = 'All due to a positive mental attitude';
 				records += gainedRecs;
 			}  else {
-				var qu = 'Shoot, you did not find anything other than lint and <br>hairballs in the storage space. Better luck next time';
-				var ann = "That's what it's like workin for the Man every night and day"
+				qu = 'Shoot, you did not find anything other than lint and <br>hairballs in the storage space. Better luck next time';
+				ann = "That's what it's like workin for the Man every night and day";
 			}
 			game.pushScene(game.makeDialogueScene({
 				question: qu,
+				b: ['I want to clean some more!',storageSpace.clean],
 				a: [ann,nothing]
 			}));
 		};
@@ -547,6 +547,12 @@ window.onload = function() {
 			scene.addChild(label);
 			var door = [];
 			var doorX = 116;
+			function chooseADoor() { //used bellow to avoind function in loop
+				return function() {
+					game.popScene();
+					storageSpace.choseDoor();
+				};
+			}
 			for (i =0; i < 3; i++ ) {
 				door[i] = new Sprite(64,64);
 				door[i].scale(2,2);
@@ -556,10 +562,7 @@ window.onload = function() {
 				doorX += 140;
 				door[i].y = 320;
 				scene.addChild(door[i]);
-				door[i].addEventListener(Event.TOUCH_START, function() {
-					game.popScene();
-					storageSpace.choseDoor();
-				});	
+				door[i].addEventListener(Event.TOUCH_START, chooseADoor());	
 			}
 			game.pushScene(scene);
 		};
@@ -619,19 +622,19 @@ window.onload = function() {
 			} else {
 				mom.dialogue.question = 'Honey, I dont like this record obsession. Why not try cookie <br>collecting instead?';
 			}
-			if (money > 500) {
+			if (money > 400) {
 				recStoreOwner.dialogue.j = ['I want to buy your shop!',recStoreOwner.buyShop];
 			} else {
 				recStoreOwner.dialogue.j = ['Can I do some work around here?',recStoreOwner.job];
 			}
 			if (money > 10000 || records > 10000) {
 				labelLady.dialogue.question = 'Wow, you sure have done well for yourself. How can Corporate <br>Label Inc. help you?';
-				if (money > 10000) {
+				if (money > 1400) {
 					labelLady.dialogue.c = ['I want to buy this record label and become CEO!', hero.buyLabel];
 				} else { 
 					delete labelLady.dialogue.c;
 				}
-				if (records > 10000) {
+				if (records > 1400) {
 					labelLady.dialogue.b = ['I want to sell my whole record collection', hero.sellCollection];
 				} else { 
 					delete labelLady.dialogue.b;
@@ -734,7 +737,7 @@ window.onload = function() {
 		var npcLength = npcArray.length;
 		for (var i = 0; i < npcLength; i++ ) {
 			var curNpc = npcArray[i];
-			if(hero.within(curNpc, 16) ) { //15 is radius of collision
+			if(hero.within(curNpc, 16) ) { //number  is radius of collision
 				if (!curNpc.hit) { 
 					checkStats(); //checks and makes needed dialogue updates
 					game.pushScene(game.makeDialogueScene(curNpc.dialogue)); //adds dialogue box
@@ -801,13 +804,15 @@ window.onload = function() {
 			talk[i].height = game.height - 400; //400 = game not covered by text
 			scene.addChild(talk[i]);
 		}
+		//popBellow is used in the foor loop bellow. avoiding having to use closure. 
+		function popBellow(x) {
+			return function() {
+			game.popScene();
+				dialogueIn[keys[x]][1]();
+			};
+		} 
 		for (var i = 1; i < keys.length; i++ ) {
-			(function(i){ //dealing with a closure
-				talk[i].addEventListener(Event.TOUCH_START, function() {
-					game.popScene();
-					dialogueIn[keys[i]][1]();
-				});
-			})(i);
+			talk[i].addEventListener(Event.TOUCH_START, popBellow(i));
 		}
 		return scene;
 	}; //end of makeDialogueScene
