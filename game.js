@@ -420,7 +420,7 @@ window.onload = function() {
 		cuteGirl.isNotPrez = function () {
 			cuteGirl.dialogue.question = 'Hey, so maybe I can sell merch for you now?';
 			cuteGirl.dialogue.a =['Yeah, I think that is a good idea.',cuteGirl.isPrez];
-			cuteGirl.dialogue.bb = ['hmm, yeah, I dont think so.', nothing];
+			cuteGirl.dialogue.b = ['hmm, yeah, I dont think so.', nothing];
 		};
 		cuteGirl.flirt = function() {
 			game.pushScene(game.makeDialogueScene({
@@ -455,10 +455,9 @@ window.onload = function() {
 		internetGuy.flip = function() {
 			game.pushScene(game.makeDialogueScene({
 				question: 'Neat, give me ' + internetGuy.flipCost*60 + ' records and I will flip them',
-				y: ['Yeah, I think of this as an investment, here you go', function() { if (records>= internetGuy.flipCost*60) {records -= internetGuy.flipCost*60; recordInc += 0.0005;} else { cantAfford();} }],
+				y: ['Yeah, I think of this as an investment, here you go', function() { if (records>= internetGuy.flipCost*60) {records -= internetGuy.flipCost*60; recordInc += 0.0005; internetGuy.flipCost+=1;} else { cantAfford();} }],
 				a: ['No thanks, the internet is for porn not flipping records',nothing]
 			}));
-		internetGuy.flipCost += 1;
 		};
 		internetGuy.questDone = function() {
 			game.pushScene(game.makeDialogueScene({
