@@ -220,7 +220,7 @@ window.onload = function() {
 			}
 		}; //end sell
 		recStoreOwner.work = function() {
-			var seconds = 15;
+			var seconds = 12;
 			//create x amount of scenes on top of one another
 			for (var i =0; i < seconds; i++){
 				var workScene = new Scene();
@@ -230,7 +230,14 @@ window.onload = function() {
 				label.backgroundColor = "rgb(0,0,0)";
 				label.width = game.width;
 				label.height = game.height;
+				var wageSlave = new Label('Wage<br><br>Slave');
+				wageSlave.font = '98px monospace';
+				wageSlave.textAlign = 'center';
+				wageSlave.color = (i%2===1) ? 'red' : 'yellow';
+				wageSlave.y = 300;
+				wageSlave.x = 100;
 				workScene.addChild(label);
+				workScene.addChild(wageSlave);
 				game.pushScene(workScene);
 			}
 			//removes above scenes, one per second
@@ -320,7 +327,7 @@ window.onload = function() {
 		};
 		storageGuy.sellDrums = function() {
 			game.pushScene(game.makeDialogueScene({
-				question: 'Yeah, I can hook you up. A drum kit will cost you 80 high quality <br>prog rock records',
+				question: 'Yeah, I can hook you up. A drum kit will cost you 80 high<br>quality prog rock records',
 				y: ['Deal! Prog rock is for burnt out hippies anyway',storageGuy.soldDrums],
 				n: ['Give up my precious records? no way',nothing]
 			}));
@@ -333,14 +340,14 @@ window.onload = function() {
 			}));
 		};
 		storageGuy.dialogue = {
-			question: 'Welcome to Junk in a Truck Storage. You can buy storage space for<br>your records here. Sometimes I have stuff for sale from<br>abandoned storage units',
+			question: 'Welcome to Junk in a Truck Storage. You can buy storage space<br>for your records here. Sometimes I have stuff for sale from<br>abandoned storage units',
 			y: ['I need more room for records.',storageGuy.buySpace],
 			n: ['No thanks, I can probably find more space to keep my records in<br>my room at home. I bet mom wont mind.',nothing]
 		};
 ///////////////////////rockerGuy dialogue///////////
 		rockerGuy.showsPlays = 1;
 		rockerGuy.playShow = function () {
-			var seconds = 15;
+			var seconds = 15, pit = [];
 			for (var i =0; i < seconds; i++){
 				var workScene = new Scene();
 				var label = new Label('<br>you make money playing shows. Shows also<br>increase your fame, increasing your<br>merch income. Please wait while we circle pit');
@@ -349,7 +356,14 @@ window.onload = function() {
 				label.backgroundColor = "rgb(0,0,0)";
 				label.width = game.width;
 				label.height = game.height;
+				pit[i] = new Sprite(64,64);
+				pit[i].scale(2,2);
+				pit[i].frame = 3+(i%2); //3 or 4
+				pit[i].x = 300;
+				pit[i].y = 320;
+				pit[i].image = game.assets['spritesheet.png'];
 				workScene.addChild(label);
+				workScene.addChild(pit[i]);
 				game.pushScene(workScene); //ADD ROCKING IMAGE
 			}
 			//removes above scenes, one per second
@@ -399,9 +413,16 @@ window.onload = function() {
 				}
 			};
 		})();
+		rockerGuy.gaveRecsTalk = function() {
+			var talkArray = ['Keep on rockin in the free world!', 'I love music', 'I wanna rock and roll all night...', 'Thank you', "You're not as nerdy as you look",'Thrash, kill destroy!'];
+			game.pushScene(game.makeDialogueScene({
+				question: talkArray[Math.floor(Math.random()*6)],
+				a: ['I hope you enjoy it',nothing]
+			}));
+		};
 		rockerGuy.dialogue = {
-			question: "Oi! My band is playing a show soon, you should come check us out. <br>I hear you have a bunch of records. Let me have one.",
-			g: ['Uhh, ok. You can have one of my records',function() {if (records >=1  ) {records--;rockerGuy.gaveRecs();} else { cantAfford();}}],
+			question: "Oi! My band is playing a show soon, you should come check us<br>out. I hear you have a bunch of records. Let me have one.",
+			g: ['Uhh, ok. You can have one of my records',function() {if (records >=1  ) {records--;rockerGuy.gaveRecs();rockerGuy.gaveRecsTalk();} else { cantAfford();}}],
 			n: ['What? Get your own records, you bum.',nothing],
 		};
 
