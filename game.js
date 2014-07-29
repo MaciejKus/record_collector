@@ -222,7 +222,7 @@ window.onload = function() {
 		recStoreOwner.work = function() {
 			var seconds = 12;
 			//create x amount of scenes on top of one another
-			for (var i =0; i < seconds; i++){
+			var anim = function(i) {
 				var workScene = new Scene();
 				var label = new Label('<br> Working hard, please wait ' + i + ' seconds');
 				label.font = '24px monospace';
@@ -240,8 +240,12 @@ window.onload = function() {
 				workScene.addChild(wageSlave);
 				game.pushScene(workScene);
 			}
-			//removes above scenes, one per second
-			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt);} }, 1000);
+			anim(seconds);
+			//removes scene then draws next one one at a time
+			//before i drew all the scenes then removed one at a time
+			//after drawing all at once. this way should be less resource
+			//intensive
+			var workIt = setInterval( function() { game.popScene(); seconds--; anim(seconds); if (seconds <1) {game.popScene(); clearInterval(workIt);} }, 1000);
 		}; //end work
 		recStoreOwner.job = function() {
 			recStoreOwner.recMultiplier = Math.floor(records/5) || 1;
@@ -348,9 +352,9 @@ window.onload = function() {
 		rockerGuy.showsPlays = 1;
 		rockerGuy.playShow = function () {
 			var seconds = 15, pit = [];
-			for (var i =0; i < seconds; i++){
+			var anim = function(i) {
 				var workScene = new Scene();
-				var label = new Label('<br>you make money playing shows. Shows also<br>increase your fame, increasing your<br>merch income. Please wait while we circle pit');
+				var label = new Label('<br>you make money playing shows. Shows also<br>increase your fame, increasing your<br>merch income. Please wait while we circle<br>pit');
 				label.font = '24px monospace';
 				label.color = 'rgb(255,200,0)';
 				label.backgroundColor = "rgb(0,0,0)";
@@ -366,8 +370,8 @@ window.onload = function() {
 				workScene.addChild(pit[i]);
 				game.pushScene(workScene); //ADD ROCKING IMAGE
 			}
-			//removes above scenes, one per second
-			var workIt = setInterval( function() { game.popScene(); seconds--; if (seconds <0) {clearInterval(workIt);} }, 1000);
+			anim(seconds);
+			var workIt = setInterval( function() { game.popScene(); seconds--; anim(seconds); if (seconds <1) {game.popScene(); clearInterval(workIt);} }, 1000);
 			money += 2*rockerGuy.showsPlays;
 			rockerGuy.showsPlays++;
 		};
